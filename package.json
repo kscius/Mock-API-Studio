@@ -2,6 +2,7 @@
   "name": "mock-api-studio",
   "version": "1.0.0",
   "description": "Mock API Studio - Monorepo",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev:backend": "cd backend && npm run start:dev",
