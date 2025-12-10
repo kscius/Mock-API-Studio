@@ -1,0 +1,77 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: mockapi-db
+    environment:
+      POSTGRES_USER: mockapi
+      POSTGRES_PASSWORD: mockapi
+      POSTGRES_DB: mockapi
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - mockapi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mockapi"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: mockapi-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mockapi-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mockapi-backend
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://mockapi:mockapi@db:5432/mockapi?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PORT: 3000
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    networks:
+      - mockapi-network
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mockapi-frontend
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+    networks:
+      - mockapi-network
+    restart: unless-stopped
+
+networks:
+  mockapi-network:
+    driver: bridge
+
+volumes:
+  db_data:
+

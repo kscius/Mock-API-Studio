@@ -2,8 +2,6 @@
 
 A complete enterprise-grade solution for designing, managing, and serving mock APIs with multi-tenancy, webhooks, GraphQL support, and comprehensive testing.
 
-> **⭐ PRODUCTION-READY**: Now with 80%+ test coverage, configurable caching, webhook retries, dark mode, Prometheus metrics, CI/CD pipeline, and Kubernetes manifests. See [PRODUCTION_HARDENING_SUMMARY.md](./PRODUCTION_HARDENING_SUMMARY.md) for details.
-
 ## 🚀 Features
 
 ### Core Features
@@ -22,20 +20,12 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
 - **✅ JSON Schema Validation**: Validate requests against OpenAPI-style schemas
 - **🎨 Handlebars Templating**: Dynamic responses with `{{params.id}}`, `{{query.name}}`, etc.
 - **📄 OpenAPI Import**: Drag & drop Swagger/OpenAPI 3.0 specs to auto-generate mocks
-- **🪝 Webhooks**: Fire HTTP notifications with retry logic and exponential backoff
+- **🪝 Webhooks**: Fire HTTP notifications when mock requests occur
 - **🔷 GraphQL Support**: Mock GraphQL queries and mutations
-- **📊 Analytics**: Request tracking, metrics, performance stats, and automated retention cleanup
-- **🔒 Security**: Helmet, rate limiting (per-workspace), CORS protection
+- **📊 Analytics**: Request tracking, metrics, and performance stats
+- **🔒 Security**: Helmet, rate limiting, CORS protection
 - **⚡ Conditional Responses**: Match responses based on query params, headers, or body
-- **🧪 Comprehensive Testing**: 80%+ test coverage with Jest, Vitest, and Playwright
-
-### Production Features 🚀
-- **🎨 Dark Mode**: Full light/dark theme support with system preference detection
-- **🔔 Toast Notifications**: Centralized error handling with user-friendly messages
-- **📈 Prometheus Metrics**: HTTP, webhook, cache, and runtime metrics for monitoring
-- **⚙️ Configurable**: Cache TTL, rate limits, webhook retries, analytics retention via env vars
-- **🔄 CI/CD Pipeline**: GitHub Actions workflow with automated testing and Docker builds
-- **☸️ Kubernetes Ready**: Production-grade K8s manifests with health probes and auto-scaling
+- **🧪 Comprehensive Testing**: Jest, Vitest, and Playwright test suites
 
 ## 📋 Tech Stack
 
@@ -382,34 +372,6 @@ npm run prisma:studio               # Visual DB editor
 npm run prisma:seed                 # Seed example data
 ```
 
-### Testing & Coverage
-
-**Backend:**
-```bash
-cd backend
-npm run test                        # Run all tests
-npm run test:watch                  # Watch mode
-npm run test:coverage               # Generate coverage report (80% threshold)
-npm run test:e2e                    # Integration tests
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm run test                        # Run all tests
-npm run test:watch                  # Watch mode
-npm run test:coverage               # Generate coverage report (70% threshold)
-```
-
-**E2E Tests:**
-```bash
-npm run test:e2e                    # Run Playwright tests
-```
-
-**Coverage Reports:**
-- Backend: `backend/coverage/lcov-report/index.html`
-- Frontend: `frontend/coverage/index.html`
-
 ### Code Quality
 ```bash
 # Backend
@@ -422,66 +384,15 @@ cd frontend
 npm run lint                        # ESLint
 ```
 
-### Monitoring & Metrics
-
-**Prometheus Metrics:**
-```bash
-# Access metrics endpoint
-curl http://localhost:3000/metrics
-```
-
-**Available Metrics:**
-- `http_requests_total` - Total HTTP requests by method, route, status, workspace
-- `http_request_duration_seconds` - Request latency histogram
-- `mock_requests_total` - Mock API requests by API slug, method, endpoint
-- `webhook_deliveries_total` - Webhook delivery counts by event type and status
-- `cache_hits_total` / `cache_misses_total` - Cache performance
-- Node.js metrics (CPU, memory, event loop lag)
-
-**Grafana Dashboard:**
-```promql
-# Request rate
-rate(http_requests_total[5m])
-
-# P95 latency
-histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
-
-# Webhook success rate
-rate(webhook_deliveries_total{status="success"}[5m]) / rate(webhook_deliveries_total[5m])
-```
-
 ### Environment Variables
 
 **Backend** (`.env`):
 ```env
-# Database
 DATABASE_URL=postgresql://mockapi:mockapi@localhost:5432/mockapi
-
-# Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379
-
-# Auth
 JWT_SECRET=your-super-secret-jwt-key
-
-# Server
 PORT=3000
-NODE_ENV=production
-
-# Cache
-MOCK_API_CACHE_TTL_SECONDS=60
-
-# Analytics
-ANALYTICS_ENABLED=true
-ANALYTICS_RETENTION_DAYS=90
-
-# Rate Limiting
-GLOBAL_RATE_LIMIT_RPM=100
-WORKSPACE_RATE_LIMIT_RPM=500
-
-# Webhooks
-WEBHOOK_RETRY_ATTEMPTS=3
-WEBHOOK_RETRY_DELAY_MS=1000
 ```
 
 **Frontend** (`.env`):
@@ -489,67 +400,16 @@ WEBHOOK_RETRY_DELAY_MS=1000
 VITE_API_BASE_URL=http://localhost:3000
 ```
 
-## ☸️ Kubernetes Deployment
-
-**Quick Deploy:**
-```bash
-# Create secrets
-cp k8s/secret.yaml.template k8s/secret.yaml
-# Edit and add base64-encoded values
-
-# Apply manifests
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/secret.yaml
-kubectl apply -f k8s/backend-deployment.yaml
-kubectl apply -f k8s/frontend-deployment.yaml
-kubectl apply -f k8s/ingress.yaml
-
-# Verify
-kubectl get pods
-kubectl logs -f deployment/mock-api-studio-backend
-```
-
-**Features:**
-- 2 replicas per service (auto-scaling ready)
-- Health probes (liveness + readiness)
-- Resource limits (CPU & memory)
-- ConfigMap for non-sensitive config
-- Secrets for DB and JWT
-- Ingress with TLS support
-
-**Scaling:**
-```bash
-kubectl scale deployment mock-api-studio-backend --replicas=5
-```
-
-See [k8s/README.md](k8s/README.md) for full deployment guide.
-
-## 🔄 CI/CD Pipeline
-
-**GitHub Actions Workflow:**
-- ✅ Automated testing on PR and push
-- ✅ Coverage enforcement (80% backend, 70% frontend)
-- ✅ Docker image builds
-- ✅ Codecov integration
-- ✅ Multi-stage builds with caching
-
-**Workflow File:** `.github/workflows/ci.yml`
-
-**Triggers:**
-- Push to `main` or `develop`
-- Pull requests to `main` or `develop`
-
 ## 📖 Architecture Highlights
 
 - **Clean Architecture**: Modules organized by domain (workspaces, webhooks, etc.)
 - **Dependency Injection**: NestJS DI container for testability
 - **SOLID Principles**: Single responsibility, interface segregation
-- **Caching Strategy**: Redis for API definitions, configurable TTL, automatic invalidation
-- **Async Webhooks**: Non-blocking event notifications with retry logic and exponential backoff
+- **Caching Strategy**: Redis for API definitions, automatic invalidation
+- **Async Webhooks**: Non-blocking event notifications via `setImmediate`
 - **Type Safety**: Full TypeScript coverage (backend + frontend)
-- **React Context**: State management for auth, workspace, and theme
+- **React Context**: State management for auth and workspace selection
 - **Protected Routes**: HOC pattern for authenticated pages
-- **Observability**: Prometheus metrics, structured logging, health checks
 
 ## 🤝 Contributing
 

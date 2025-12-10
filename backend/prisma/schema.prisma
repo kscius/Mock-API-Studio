@@ -1,0 +1,129 @@
+// backend/prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Workspace {
+  id             String          @id @default(uuid())
+  name           String
+  slug           String          @unique
+  description    String?
+  isActive       Boolean         @default(true)
+  apiDefinitions ApiDefinition[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("workspaces")
+}
+
+model ApiDefinition {
+  id          String        @id @default(uuid())
+  workspaceId String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String
+  version     String        @default("1.0.0")
+  basePath    String        @default("/")
+  description String?
+  isActive    Boolean       @default(true)
+  tags        String[]
+  endpoints   ApiEndpoint[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([workspaceId, slug])
+  @@map("api_definitions")
+}
+
+model ApiEndpoint {
+  id              String        @id @default(uuid())
+  apiId           String
+  api             ApiDefinition @relation(fields: [apiId], references: [id], onDelete: Cascade)
+  method          String
+  path            String
+  summary         String?
+  requestSchema   Json?
+  responses       Json          // array de posibles responses
+  delayMs         Int           @default(0)
+  enabled         Boolean       @default(true)
+  // GraphQL support
+  type            String        @default("REST") // REST | GRAPHQL
+  operationName   String?       // for GraphQL
+  operationType   String?       // query | mutation | subscription
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([apiId, method, path])
+  @@map("api_endpoints")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // bcrypt hash
+  name      String?
+  role      String   @default("user") // user | admin
+  isActive  Boolean  @default(true)
+  apiKeys   ApiKey[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  key         String   @unique // hash del key real
+  name        String   // nombre descriptivo
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scope       String[] // qué APIs puede acceder, ["*"] = todas
+  isActive    Boolean  @default(true)
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("api_keys")
+}
+
+model MockRequest {
+  id           String   @id @default(uuid())
+  workspaceId  String?
+  apiSlug      String
+  endpointId   String?
+  method       String
+  path         String
+  statusCode   Int
+  durationMs   Int
+  userAgent    String?
+  ip           String?
+  error        String?
+  createdAt    DateTime @default(now())
+
+  @@index([workspaceId, apiSlug, createdAt])
+  @@index([apiSlug, createdAt])
+  @@index([createdAt])
+  @@map("mock_requests")
+}
+
+model WebhookSubscription {
+  id          String   @id @default(uuid())
+  workspaceId String?
+  apiId       String?  // optional: subscribe to specific API
+  targetUrl   String
+  eventType   String   // mock.request.received | mock.response.sent
+  isActive    Boolean  @default(true)
+  secret      String?  // for signing
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workspaceId, isActive])
+  @@map("webhook_subscriptions")
+}
+

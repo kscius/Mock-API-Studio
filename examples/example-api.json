@@ -1,0 +1,215 @@
+{
+  "type": "mock-api-definition",
+  "schemaVersion": "1.0.0",
+  "api": {
+    "name": "E-commerce API",
+    "slug": "ecommerce",
+    "version": "1.0.0",
+    "basePath": "/api/v1",
+    "description": "Mock e-commerce API for testing shopping cart functionality",
+    "isActive": true,
+    "tags": ["ecommerce", "example", "shopping"]
+  },
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/products",
+      "summary": "List all products",
+      "requestSchema": {
+        "query": {
+          "page": { "type": "number", "default": 1 },
+          "limit": { "type": "number", "default": 10 }
+        }
+      },
+      "responses": [
+        {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json",
+            "X-Total-Count": "42"
+          },
+          "body": {
+            "data": [
+              {
+                "id": 1,
+                "name": "Wireless Mouse",
+                "price": 29.99,
+                "category": "Electronics",
+                "inStock": true
+              },
+              {
+                "id": 2,
+                "name": "USB Cable",
+                "price": 9.99,
+                "category": "Accessories",
+                "inStock": true
+              },
+              {
+                "id": 3,
+                "name": "Laptop Stand",
+                "price": 49.99,
+                "category": "Accessories",
+                "inStock": false
+              }
+            ],
+            "meta": {
+              "page": 1,
+              "limit": 10,
+              "total": 42
+            }
+          },
+          "isDefault": true
+        }
+      ],
+      "delayMs": 150,
+      "enabled": true
+    },
+    {
+      "method": "GET",
+      "path": "/products/:id",
+      "summary": "Get product by ID",
+      "responses": [
+        {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "id": 1,
+            "name": "Wireless Mouse",
+            "description": "Ergonomic wireless mouse with 6 programmable buttons",
+            "price": 29.99,
+            "category": "Electronics",
+            "inStock": true,
+            "images": [
+              "https://example.com/images/mouse-1.jpg",
+              "https://example.com/images/mouse-2.jpg"
+            ],
+            "specifications": {
+              "color": "Black",
+              "connectivity": "Wireless",
+              "batteryLife": "6 months"
+            }
+          },
+          "isDefault": true
+        },
+        {
+          "status": 404,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "error": "Product not found",
+            "code": "PRODUCT_NOT_FOUND"
+          },
+          "isDefault": false
+        }
+      ],
+      "delayMs": 100,
+      "enabled": true
+    },
+    {
+      "method": "POST",
+      "path": "/cart/items",
+      "summary": "Add item to cart",
+      "requestSchema": {
+        "body": {
+          "productId": { "type": "number", "required": true },
+          "quantity": { "type": "number", "required": true, "minimum": 1 }
+        }
+      },
+      "responses": [
+        {
+          "status": 201,
+          "headers": {
+            "Content-Type": "application/json",
+            "Location": "/cart/items/abc123"
+          },
+          "body": {
+            "id": "abc123",
+            "productId": 1,
+            "quantity": 2,
+            "addedAt": "2024-01-01T10:00:00Z"
+          },
+          "isDefault": true
+        },
+        {
+          "status": 400,
+          "body": {
+            "error": "Invalid quantity",
+            "code": "INVALID_QUANTITY"
+          },
+          "isDefault": false
+        },
+        {
+          "status": 404,
+          "body": {
+            "error": "Product not found",
+            "code": "PRODUCT_NOT_FOUND"
+          },
+          "isDefault": false
+        }
+      ],
+      "delayMs": 200,
+      "enabled": true
+    },
+    {
+      "method": "GET",
+      "path": "/cart",
+      "summary": "Get current cart",
+      "responses": [
+        {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "items": [
+              {
+                "id": "abc123",
+                "productId": 1,
+                "productName": "Wireless Mouse",
+                "price": 29.99,
+                "quantity": 2,
+                "subtotal": 59.98
+              }
+            ],
+            "summary": {
+              "itemCount": 1,
+              "totalQuantity": 2,
+              "subtotal": 59.98,
+              "tax": 5.40,
+              "total": 65.38
+            }
+          },
+          "isDefault": true
+        }
+      ],
+      "delayMs": 100,
+      "enabled": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/cart/items/:itemId",
+      "summary": "Remove item from cart",
+      "responses": [
+        {
+          "status": 204,
+          "body": null,
+          "isDefault": true
+        },
+        {
+          "status": 404,
+          "body": {
+            "error": "Cart item not found",
+            "code": "ITEM_NOT_FOUND"
+          },
+          "isDefault": false
+        }
+      ],
+      "delayMs": 150,
+      "enabled": true
+    }
+  ]
+}
+

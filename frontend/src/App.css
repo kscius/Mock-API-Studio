@@ -1,0 +1,78 @@
+/* frontend/src/App.css */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background-color: #1f2937;
+  color: white;
+  padding: 16px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.header-subtitle {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.nav {
+  display: flex;
+  gap: 16px;
+}
+
+.nav a {
+  color: #d1d5db;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav a:hover {
+  color: white;
+}
+
+.nav a.active {
+  color: #60a5fa;
+}
+
+.main-content {
+  flex: 1;
+  padding: 32px 0;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.page-description {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.page-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
