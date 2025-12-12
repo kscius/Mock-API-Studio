@@ -36,6 +36,7 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
 - **⚙️ Configurable**: Cache TTL, rate limits, webhook retries, analytics retention via env vars
 - **🔄 CI/CD Pipeline**: GitHub Actions workflow with automated testing and Docker builds
 - **☸️ Kubernetes Ready**: Production-grade K8s manifests with health probes and auto-scaling
+- **🛠️ CLI Tool**: Powerful command-line interface for managing APIs, workspaces, and imports
 
 ## 📋 Tech Stack
 
@@ -64,6 +65,13 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
 - **Nginx** - Web server for frontend
 - **Playwright** - End-to-end testing
 
+### CLI
+- **Commander** - Command-line framework
+- **Inquirer** - Interactive prompts
+- **Chalk** - Terminal colors
+- **Ora** - Loading spinners
+- **cli-table3** - Table formatting
+
 ## 🏗️ Project Structure
 
 ```
@@ -78,8 +86,9 @@ mock-api-studio/
 │   │   ├── analytics/          # Usage tracking
 │   │   ├── auth/               # JWT + API Keys
 │   │   ├── openapi/            # OpenAPI parser
+│   │   ├── audit-logs/         # Audit trail
 │   │   ├── common/             # Shared modules (Prisma, Redis)
-│   │   └── shared/             # Utilities
+│   │   └── shared/             # Utilities (Faker, validation)
 │   ├── prisma/
 │   │   ├── schema.prisma       # Database schema
 │   │   ├── migrations/         # DB migrations
@@ -95,6 +104,14 @@ mock-api-studio/
 │   │   └── test/               # Vitest tests
 │   ├── nginx.conf
 │   └── Dockerfile
+├── cli/                        # Command-line interface
+│   ├── src/
+│   │   ├── commands/           # CLI commands
+│   │   ├── api-client.ts       # API client
+│   │   ├── config.ts           # Config management
+│   │   └── index.ts            # Entry point
+│   ├── package.json
+│   └── README.md
 ├── e2e/                        # Playwright E2E tests
 ├── docker-compose.yml          # Multi-service setup
 ├── playwright.config.ts        # E2E config
@@ -262,6 +279,59 @@ Content-Type: application/json
 }
 ```
 
+## 🛠️ CLI Usage
+
+Mock API Studio includes a powerful CLI for managing APIs from the terminal.
+
+### Installation
+
+```bash
+cd cli
+npm install
+npm run build
+npm link
+```
+
+### Quick Start
+
+```bash
+# Login
+mock-api login
+
+# Select workspace
+mock-api workspace list
+mock-api workspace select my-workspace
+
+# Create API
+mock-api api create --name "Users API" --slug users-api
+
+# Import OpenAPI spec
+mock-api import ./swagger.json
+
+# List APIs
+mock-api api list
+```
+
+### Available Commands
+
+```bash
+mock-api login [--email EMAIL] [--password PASSWORD] [--api-key KEY]
+mock-api logout
+mock-api config
+
+mock-api workspace list
+mock-api workspace create [--name NAME] [--slug SLUG]
+mock-api workspace select <slug>
+
+mock-api api list [--workspace WORKSPACE_ID]
+mock-api api create [--name NAME] [--slug SLUG]
+mock-api api delete <api-id>
+
+mock-api import <file> [--workspace WORKSPACE_ID] [--dry-run]
+```
+
+See [CLI README](./cli/README.md) for complete documentation.
+
 ## 🧪 Testing
 
 ### Run All Tests
@@ -273,6 +343,7 @@ npm run test:e2e        # Playwright E2E
 # Individual
 npm run test:backend    # Jest unit + integration
 npm run test:frontend   # Vitest
+npm run test:cli        # CLI tests
 ```
 
 ### Backend Tests (Jest)

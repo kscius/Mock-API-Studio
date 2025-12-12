@@ -18,13 +18,19 @@ import { CreateApiDefinitionDto } from './dto/create-api-definition.dto';
 import { UpdateApiDefinitionDto } from './dto/update-api-definition.dto';
 import { CreateEndpointDto } from './dto/create-endpoint.dto';
 import { UpdateEndpointDto } from './dto/update-endpoint.dto';
+import { DuplicateEndpointDto } from './dto/duplicate-endpoint.dto';
 import { OpenApiParserService } from '../openapi/openapi-parser.service';
+import { OpenApiGeneratorService } from '../openapi/openapi-generator.service';
+import { AuditLog } from '../audit-logs/decorators/audit-log.decorator';
+import { ConfigService } from '../config/config.service';
 
 @Controller('api-definitions')
 export class ApiDefinitionsController {
   constructor(
     private readonly service: ApiDefinitionsService,
     private readonly openApiParser: OpenApiParserService,
+    private readonly openApiGenerator: OpenApiGeneratorService,
+    private readonly config: ConfigService,
   ) {}
 
   // ========== API DEFINITIONS ==========
@@ -40,16 +46,37 @@ export class ApiDefinitionsController {
   }
 
   @Post()
+  @AuditLog({
+    action: 'create',
+    entityType: 'api',
+    getEntityId: (result) => result.id,
+    getEntityName: (result) => result.name,
+    getWorkspaceId: (result) => result.workspaceId,
+  })
   create(@Body() dto: CreateApiDefinitionDto) {
     return this.service.create(dto);
   }
 
   @Patch(':id')
+  @AuditLog({
+    action: 'update',
+    entityType: 'api',
+    getEntityId: (result) => result.id,
+    getEntityName: (result) => result.name,
+    getWorkspaceId: (result) => result.workspaceId,
+  })
   update(@Param('id') id: string, @Body() dto: UpdateApiDefinitionDto) {
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
+  @AuditLog({
+    action: 'delete',
+    entityType: 'api',
+    getEntityId: (_, req) => req.params.id,
+    getEntityName: (result) => result.name,
+    getWorkspaceId: (result) => result.workspaceId,
+  })
   remove(@Param('id') id: string) {
     return this.service.remove(id);
   }
@@ -57,18 +84,51 @@ export class ApiDefinitionsController {
   // ========== ENDPOINTS ==========
 
   @Post(':apiId/endpoints')
+  @AuditLog({
+    action: 'create',
+    entityType: 'endpoint',
+    getEntityId: (result) => result.id,
+    getEntityName: (result) => `${result.method} ${result.path}`,
+    getWorkspaceId: async (result, req) => {
+      // Need to fetch the API to get workspaceId
+      const api = await req.app.get('ApiDefinitionsService').findOneById(req.params.apiId);
+      return api?.workspaceId;
+    },
+  })
   createEndpoint(@Param('apiId') apiId: string, @Body() dto: CreateEndpointDto) {
     return this.service.createEndpoint(apiId, dto);
   }
 
   @Patch('endpoints/:endpointId')
+  @AuditLog({
+    action: 'update',
+    entityType: 'endpoint',
+    getEntityId: (result) => result.id,
+    getEntityName: (result) => `${result.method} ${result.path}`,
+    getWorkspaceId: (result) => result.api?.workspaceId,
+  })
   updateEndpoint(@Param('endpointId') endpointId: string, @Body() dto: UpdateEndpointDto) {
     return this.service.updateEndpoint(endpointId, dto);
   }
 
   @Delete('endpoints/:endpointId')
+  @AuditLog({
+    action: 'delete',
+    entityType: 'endpoint',
+    getEntityId: (_, req) => req.params.endpointId,
+    getEntityName: (result) => `${result.method} ${result.path}`,
+    getWorkspaceId: (result) => result.api?.workspaceId,
+  })
   removeEndpoint(@Param('endpointId') endpointId: string) {
     return this.service.removeEndpoint(endpointId);
+  }
+
+  @Post('endpoints/:endpointId/duplicate')
+  duplicateEndpoint(
+    @Param('endpointId') endpointId: string,
+    @Body() dto?: DuplicateEndpointDto,
+  ) {
+    return this.service.duplicateEndpoint(endpointId, dto);
   }
 
   // ========== IMPORT / EXPORT ==========
@@ -76,6 +136,19 @@ export class ApiDefinitionsController {
   @Get(':apiId/export')
   exportApi(@Param('apiId') apiId: string) {
     return this.service.exportApi(apiId);
+  }
+
+  @Get(':apiId/openapi.json')
+  async generateOpenApiSpec(@Param('apiId') apiId: string) {
+    const api = await this.service.findOneById(apiId);
+    if (!api) {
+      throw new BadRequestException('API not found');
+    }
+
+    // Get base URL from config or request
+    const mockBaseUrl = process.env.MOCK_BASE_URL || 'http://localhost:3000';
+
+    return this.openApiGenerator.generateOpenApiSpec(api as any, mockBaseUrl);
   }
 
   @Post('import')

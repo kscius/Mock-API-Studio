@@ -15,6 +15,7 @@ model Workspace {
   description    String?
   isActive       Boolean         @default(true)
   apiDefinitions ApiDefinition[]
+  auditLogs      AuditLog[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
@@ -63,15 +64,16 @@ model ApiEndpoint {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String   // bcrypt hash
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String     // bcrypt hash
   name      String?
-  role      String   @default("user") // user | admin
-  isActive  Boolean  @default(true)
+  role      String     @default("user") // user | admin
+  isActive  Boolean    @default(true)
   apiKeys   ApiKey[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  auditLogs AuditLog[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@map("users")
 }
@@ -125,5 +127,27 @@ model WebhookSubscription {
 
   @@index([workspaceId, isActive])
   @@map("webhook_subscriptions")
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      String    // create | update | delete
+  entityType  String    // api | endpoint | workspace | webhook | user
+  entityId    String
+  entityName  String?   // Human-readable name for display
+  changes     Json?     // Before/after values { before: {...}, after: {...} }
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId, createdAt])
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
 

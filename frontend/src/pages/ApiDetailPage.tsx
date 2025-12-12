@@ -4,6 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { apiDefinitionsApi } from '../api/api-definitions';
 import { ApiDefinition } from '../api/types';
 import { EndpointCard } from '../components/EndpointCard';
+import { SwaggerUIViewer } from '../components/SwaggerUIViewer';
+
+type TabType = 'endpoints' | 'docs';
 
 export function ApiDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -12,6 +15,7 @@ export function ApiDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('endpoints');
 
   useEffect(() => {
     if (id) {
@@ -157,29 +161,76 @@ export function ApiDetailPage() {
       </div>
 
       <div style={{ marginTop: '32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: '600' }}>Endpoints</h2>
-          <button 
-            className="btn btn-primary"
-            onClick={() => navigate(`/apis/${id}/endpoints/new`)}
-          >
-            + New Endpoint
-          </button>
+        {/* Tabs */}
+        <div style={{ borderBottom: '2px solid #e5e7eb', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <button
+              onClick={() => setActiveTab('endpoints')}
+              style={{
+                padding: '12px 16px',
+                background: 'none',
+                border: 'none',
+                borderBottom: activeTab === 'endpoints' ? '2px solid #3b82f6' : '2px solid transparent',
+                color: activeTab === 'endpoints' ? '#3b82f6' : '#6b7280',
+                fontWeight: activeTab === 'endpoints' ? '600' : '400',
+                cursor: 'pointer',
+                fontSize: '16px',
+                marginBottom: '-2px',
+              }}
+            >
+              Endpoints ({api.endpoints?.length || 0})
+            </button>
+            <button
+              onClick={() => setActiveTab('docs')}
+              style={{
+                padding: '12px 16px',
+                background: 'none',
+                border: 'none',
+                borderBottom: activeTab === 'docs' ? '2px solid #3b82f6' : '2px solid transparent',
+                color: activeTab === 'docs' ? '#3b82f6' : '#6b7280',
+                fontWeight: activeTab === 'docs' ? '600' : '400',
+                cursor: 'pointer',
+                fontSize: '16px',
+                marginBottom: '-2px',
+              }}
+            >
+              📚 API Docs (Swagger UI)
+            </button>
+          </div>
         </div>
 
-        {api.endpoints && api.endpoints.length > 0 ? (
-          api.endpoints.map((endpoint) => (
-            <EndpointCard
-              key={endpoint.id}
-              apiId={api.id}
-              endpoint={endpoint}
-              onDelete={handleDeleteEndpoint}
-            />
-          ))
-        ) : (
-          <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
-            <p style={{ color: '#6b7280' }}>No endpoints found. Create your first endpoint!</p>
-          </div>
+        {/* Tab Content */}
+        {activeTab === 'endpoints' && (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: '600' }}>Endpoints</h2>
+              <button 
+                className="btn btn-primary"
+                onClick={() => navigate(`/apis/${id}/endpoints/new`)}
+              >
+                + New Endpoint
+              </button>
+            </div>
+
+            {api.endpoints && api.endpoints.length > 0 ? (
+              api.endpoints.map((endpoint) => (
+                <EndpointCard
+                  key={endpoint.id}
+                  apiId={api.id}
+                  endpoint={endpoint}
+                  onDelete={handleDeleteEndpoint}
+                />
+              ))
+            ) : (
+              <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+                <p style={{ color: '#6b7280' }}>No endpoints found. Create your first endpoint!</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'docs' && (
+          <SwaggerUIViewer apiId={api.id} />
         )}
       </div>
     </div>

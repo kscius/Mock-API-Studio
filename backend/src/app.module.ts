@@ -1,5 +1,6 @@
 // backend/src/app.module.ts
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule } from './config/config.module';
 import { PrismaModule } from './common/prisma/prisma.module';
@@ -13,6 +14,8 @@ import { AuthModule } from './auth/auth.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { GraphQLRuntimeModule } from './graphql-runtime/graphql-runtime.module';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { AuditLogInterceptor } from './audit-logs/interceptors/audit-log.interceptor';
 
 @Module({
   imports: [
@@ -32,9 +35,15 @@ import { GraphQLRuntimeModule } from './graphql-runtime/graphql-runtime.module';
     MockRuntimeModule,
     GraphQLRuntimeModule,
     AnalyticsModule,
+    AuditLogsModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditLogInterceptor,
+    },
+  ],
 })
 export class AppModule {}
 

@@ -35,6 +35,9 @@ export const apiDefinitionsApi = {
   deleteEndpoint: (endpointId: string) =>
     apiClient.delete(`/api-definitions/endpoints/${endpointId}`),
 
+  duplicateEndpoint: (endpointId: string, data?: { path?: string; method?: string; summary?: string }) =>
+    apiClient.post(`/api-definitions/endpoints/${endpointId}/duplicate`, data || {}),
+
   // Import/Export
   exportApi: (apiId: string) =>
     apiClient.get(`/api-definitions/${apiId}/export`),

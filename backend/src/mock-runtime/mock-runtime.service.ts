@@ -8,6 +8,7 @@ import { ValidationService } from '../shared/services/validation.service';
 import { renderWithTemplate } from '../shared/utils/template-engine';
 import { responseMatches } from '../shared/utils/response-matcher';
 import { WebhooksService } from '../webhooks/webhooks.service';
+import { FakerTemplatingService } from '../shared/faker-templating.service';
 
 interface ResponseMatchRule {
   query?: Record<string, string | number | boolean>;
@@ -40,6 +41,7 @@ export class MockRuntimeService {
     private readonly redis: RedisService,
     private readonly config: ConfigService,
     private readonly validation: ValidationService,
+    private readonly fakerTemplating: FakerTemplatingService,
     @Inject(forwardRef(() => WebhooksService))
     private readonly webhooks: WebhooksService,
   ) {}
@@ -118,12 +120,22 @@ export class MockRuntimeService {
     }
 
     // TEMPLATING de body con Handlebars
-    const renderedBody = renderWithTemplate(response.body, {
+    let renderedBody = renderWithTemplate(response.body, {
       params,
       query: req.query || {},
       body: req.body,
       headers: req.headers || {},
     });
+
+    // Apply Faker.js templating if placeholders are present
+    if (this.fakerTemplating.hasFakerPlaceholders(renderedBody)) {
+      renderedBody = this.fakerTemplating.render(renderedBody, {
+        params,
+        query: req.query || {},
+        body: req.body,
+        headers: req.headers || {},
+      });
+    }
 
     const result = {
       statusCode: response.status,

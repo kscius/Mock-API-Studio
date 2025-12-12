@@ -6,6 +6,7 @@ import { CreateApiDefinitionDto } from './dto/create-api-definition.dto';
 import { UpdateApiDefinitionDto } from './dto/update-api-definition.dto';
 import { CreateEndpointDto } from './dto/create-endpoint.dto';
 import { UpdateEndpointDto } from './dto/update-endpoint.dto';
+import { DuplicateEndpointDto } from './dto/duplicate-endpoint.dto';
 
 @Injectable()
 export class ApiDefinitionsService {
@@ -135,6 +136,68 @@ export class ApiDefinitionsService {
     }
 
     return this.prisma.apiEndpoint.delete({ where: { id: endpointId } });
+  }
+
+  async duplicateEndpoint(endpointId: string, dto?: DuplicateEndpointDto) {
+    // Find the original endpoint
+    const original = await this.prisma.apiEndpoint.findUnique({
+      where: { id: endpointId },
+      include: { api: true },
+    });
+
+    if (!original) {
+      throw new Error('Endpoint not found');
+    }
+
+    // Generate new path if not provided
+    let newPath = dto?.path;
+    if (!newPath) {
+      // Auto-generate path with suffix
+      const pathWithoutSlash = original.path.replace(/\/$/, '');
+      let suffix = 1;
+      let candidatePath = `${pathWithoutSlash}-copy`;
+
+      // Check if path already exists, increment suffix if needed
+      while (true) {
+        const existing = await this.prisma.apiEndpoint.findFirst({
+          where: {
+            apiId: original.apiId,
+            method: dto?.method ?? original.method,
+            path: candidatePath,
+          },
+        });
+
+        if (!existing) {
+          newPath = candidatePath;
+          break;
+        }
+
+        suffix++;
+        candidatePath = `${pathWithoutSlash}-copy-${suffix}`;
+      }
+    }
+
+    // Create duplicated endpoint
+    const duplicated = await this.prisma.apiEndpoint.create({
+      data: {
+        apiId: original.apiId,
+        method: dto?.method ?? original.method,
+        path: newPath,
+        summary: dto?.summary ?? (original.summary ? `${original.summary} (Copy)` : null),
+        requestSchema: original.requestSchema as any,
+        responses: original.responses as any,
+        delayMs: original.delayMs,
+        enabled: original.enabled,
+        type: original.type,
+        operationName: original.operationName,
+        operationType: original.operationType,
+      },
+    });
+
+    // Invalidate cache
+    await this.invalidateApiCache(original.api.workspaceId, original.api.slug);
+
+    return duplicated;
   }
 
   // ========== IMPORT / EXPORT ==========

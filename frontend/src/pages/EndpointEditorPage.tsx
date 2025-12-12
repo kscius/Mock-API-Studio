@@ -10,6 +10,10 @@ export function EndpointEditorPage() {
   const [api, setApi] = useState<ApiDefinition | null>(null);
   const [endpoint, setEndpoint] = useState<ApiEndpoint | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicatePath, setDuplicatePath] = useState('');
+  const [duplicateMethod, setDuplicateMethod] = useState('');
+  const [duplicateSummary, setDuplicateSummary] = useState('');
 
   const [method, setMethod] = useState('GET');
   const [path, setPath] = useState('');
@@ -98,16 +102,46 @@ export function EndpointEditorPage() {
     }
   };
 
+  const handleDuplicate = () => {
+    if (endpoint) {
+      setDuplicatePath(endpoint.path + '-copy');
+      setDuplicateMethod(endpoint.method);
+      setDuplicateSummary(endpoint.summary ? `${endpoint.summary} (Copy)` : '');
+      setShowDuplicateModal(true);
+    }
+  };
+
+  const confirmDuplicate = async () => {
+    try {
+      const response = await apiDefinitionsApi.duplicateEndpoint(endpointId!, {
+        path: duplicatePath || undefined,
+        method: duplicateMethod || undefined,
+        summary: duplicateSummary || undefined,
+      });
+      setShowDuplicateModal(false);
+      // Navigate to the new endpoint
+      navigate(`/apis/${apiId}/endpoints/${response.data.id}`);
+    } catch (err) {
+      alert('Failed to duplicate endpoint');
+      console.error(err);
+    }
+  };
+
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
   return (
     <div>
-      <div style={{ marginBottom: '24px' }}>
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <button className="btn btn-secondary" onClick={() => navigate(`/apis/${apiId}`)}>
           ← Back to API
         </button>
+        {endpointId && endpointId !== 'new' && (
+          <button className="btn btn-secondary" onClick={handleDuplicate}>
+            📋 Duplicate Endpoint
+          </button>
+        )}
       </div>
 
       <div className="card">
@@ -266,6 +300,68 @@ export function EndpointEditorPage() {
           </div>
         </form>
       </div>
+
+      {/* Duplicate Modal */}
+      {showDuplicateModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div className="card" style={{ maxWidth: '500px', width: '100%', margin: '20px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px' }}>
+              Duplicate Endpoint
+            </h2>
+
+            <div className="form-group">
+              <label className="label">New Path</label>
+              <input
+                className="input"
+                value={duplicatePath}
+                onChange={(e) => setDuplicatePath(e.target.value)}
+                placeholder="/users/:id-copy"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="label">Method</label>
+              <select className="select" value={duplicateMethod} onChange={(e) => setDuplicateMethod(e.target.value)}>
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>PATCH</option>
+                <option>DELETE</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="label">Summary</label>
+              <input
+                className="input"
+                value={duplicateSummary}
+                onChange={(e) => setDuplicateSummary(e.target.value)}
+                placeholder="Description"
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+              <button className="btn btn-primary" onClick={confirmDuplicate} style={{ flex: 1 }}>
+                Duplicate
+              </button>
+              <button className="btn btn-secondary" onClick={() => setShowDuplicateModal(false)} style={{ flex: 1 }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
