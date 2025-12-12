@@ -112,3 +112,29 @@ export interface UpdateEndpointDto {
   operationType?: string;
 }
 
+export interface DuplicateEndpointDto {
+  path?: string;
+  summary?: string;
+}
+
+export interface User {
+  id: string;
+  name?: string;
+  email: string;
+}
+
+export interface AuditLog {
+  id: string;
+  workspaceId: string;
+  userId?: string;
+  user?: User;
+  action: string; // create, update, delete, duplicate
+  entityType: string; // api, endpoint, workspace, webhook
+  entityId: string;
+  entityName?: string;
+  changes?: any;
+  ipAddress?: string;
+  userAgent?: string;
+  createdAt: string;
+}
+

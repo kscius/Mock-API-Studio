@@ -5,6 +5,71 @@ All notable changes to Mock API Studio will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2024-12-12
+
+### Added - Phase 16 (Frontend Enhancements)
+- **Audit Logs UI**:
+  - Complete audit logs page (`/admin/audit-logs`)
+  - Table with pagination (20 entries per page)
+  - Advanced filters (action, entity type, date range)
+  - Expandable rows for detailed view
+  - Export functionality (CSV + JSON)
+  - Colored action badges (create, update, delete, duplicate)
+  - IP address and user agent tracking
+  - Dark mode support
+
+- **Faker.js Method Browser**:
+  - Modal interface with real-time search
+  - Module sidebar with method counts
+  - Method list with syntax preview
+  - Insert at cursor functionality
+  - Copy to clipboard feature
+  - Integration in endpoint editor
+  - Searchable across all modules and methods
+
+- **Faker.js Live Preview**:
+  - `ResponsePreview` component
+  - Side-by-side template vs output comparison
+  - Backend `/faker-docs/render` endpoint
+  - Generate/Regenerate functionality
+  - Copy rendered output
+  - Error handling for templates
+
+- **Enhanced JSON Editor (Monaco Editor)**:
+  - VS Code-like editing experience
+  - Syntax highlighting for JSON
+  - Bracket pair colorization
+  - Format on paste/type
+  - Line numbers
+  - Autocomplete for Faker.js placeholders
+  - Dark mode support
+  - Insert text at cursor position
+
+- **Template Variables Panel**:
+  - Collapsible panel with 5 variable groups
+  - Dynamic path parameter extraction
+  - Query parameters examples
+  - Request body variables
+  - Request headers
+  - Special variables (timestamp, uuid, etc.)
+  - Insert and copy functionality
+  - Examples for each variable type
+
+### Changed
+- `EndpointEditorPage` now uses Monaco Editor instead of textarea
+- Improved response body editing experience
+- Better dark mode support across all new components
+
+### Testing
+- Added 4 new test suites with 60+ tests:
+  - `FakerMethodBrowser.test.tsx` (16 tests)
+  - `ResponsePreview.test.tsx` (14 tests)
+  - `TemplateVariablesPanel.test.tsx` (12 tests)
+  - `AuditLogsPage.test.tsx` (14 tests)
+
+### Dependencies
+- Added `@monaco-editor/react` for enhanced code editing
+
 ## [1.2.0] - 2024-12-11
 
 ### Added - Phase 15 (Developer Experience)

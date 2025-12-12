@@ -1,8 +1,13 @@
 // frontend/src/pages/EndpointEditorPage.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiDefinitionsApi } from '../api/api-definitions';
 import { ApiDefinition, ApiEndpoint, MockResponse } from '../api/types';
+import { FakerMethodBrowser } from '../components/FakerMethodBrowser';
+import { ResponsePreview } from '../components/ResponsePreview';
+import { JSONEditor } from '../components/JSONEditor';
+import { TemplateVariablesPanel } from '../components/TemplateVariablesPanel';
+import toast from 'react-hot-toast';
 
 export function EndpointEditorPage() {
   const { apiId, endpointId } = useParams<{ apiId: string; endpointId: string }>();
@@ -14,6 +19,12 @@ export function EndpointEditorPage() {
   const [duplicatePath, setDuplicatePath] = useState('');
   const [duplicateMethod, setDuplicateMethod] = useState('');
   const [duplicateSummary, setDuplicateSummary] = useState('');
+
+  const [showFakerBrowser, setShowFakerBrowser] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [currentResponseIndex, setCurrentResponseIndex] = useState<number | null>(null);
+  const [previewBody, setPreviewBody] = useState<any>(null);
+  const [insertTexts, setInsertTexts] = useState<{ [key: number]: string }>({});
 
   const [method, setMethod] = useState('GET');
   const [path, setPath] = useState('');
@@ -93,14 +104,6 @@ export function EndpointEditorPage() {
     setResponses(updated);
   };
 
-  const updateResponseBody = (index: number, value: string) => {
-    try {
-      const parsed = JSON.parse(value);
-      updateResponse(index, 'body', parsed);
-    } catch (err) {
-      // Keep the string value for editing
-    }
-  };
 
   const handleDuplicate = () => {
     if (endpoint) {
@@ -125,6 +128,35 @@ export function EndpointEditorPage() {
       alert('Failed to duplicate endpoint');
       console.error(err);
     }
+  };
+
+  const openFakerBrowser = (responseIndex: number) => {
+    setCurrentResponseIndex(responseIndex);
+    setShowFakerBrowser(true);
+  };
+
+  const openPreview = (responseIndex: number) => {
+    setPreviewBody(responses[responseIndex].body);
+    setShowPreview(true);
+  };
+
+  const handleFakerSelect = (method: string) => {
+    if (currentResponseIndex === null) return;
+    
+    // Trigger insertion in the JSONEditor
+    setInsertTexts((prev) => ({
+      ...prev,
+      [currentResponseIndex]: method,
+    }));
+  };
+
+  const handleTextInserted = (index: number) => {
+    // Clear the insertText after it's been inserted
+    setInsertTexts((prev) => {
+      const newTexts = { ...prev };
+      delete newTexts[index];
+      return newTexts;
+    });
   };
 
   if (loading) {
@@ -206,6 +238,22 @@ export function EndpointEditorPage() {
             </div>
           </div>
 
+          {/* Template Variables Panel */}
+          <div style={{ marginTop: '24px' }}>
+            <TemplateVariablesPanel
+              path={path}
+              onInsert={(variable) => {
+                // Insert into the first response body for now
+                // In production, you might want to track which editor is focused
+                setInsertTexts((prev) => ({
+                  ...prev,
+                  [0]: variable,
+                }));
+                toast.success(`Inserted: ${variable}`);
+              }}
+            />
+          </div>
+
           <div style={{ marginTop: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Responses</h3>
@@ -275,11 +323,14 @@ export function EndpointEditorPage() {
 
                 <div className="form-group">
                   <label className="label">Body (JSON)</label>
-                  <textarea
-                    className="textarea"
-                    value={JSON.stringify(response.body || {}, null, 2)}
-                    onChange={(e) => updateResponseBody(index, e.target.value)}
-                    style={{ minHeight: '150px', fontFamily: 'monospace', fontSize: '13px' }}
+                  <JSONEditor
+                    value={response.body || {}}
+                    onChange={(value) => updateResponse(index, 'body', value)}
+                    height="250px"
+                    onInsertFaker={() => openFakerBrowser(index)}
+                    onPreview={() => openPreview(index)}
+                    insertText={insertTexts[index]}
+                    onTextInserted={() => handleTextInserted(index)}
                   />
                 </div>
               </div>
@@ -361,6 +412,22 @@ export function EndpointEditorPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Faker Method Browser */}
+      {showFakerBrowser && (
+        <FakerMethodBrowser
+          onSelect={handleFakerSelect}
+          onClose={() => setShowFakerBrowser(false)}
+        />
+      )}
+
+      {/* Response Preview */}
+      {showPreview && previewBody && (
+        <ResponsePreview
+          responseBody={previewBody}
+          onClose={() => setShowPreview(false)}
+        />
       )}
     </div>
   );

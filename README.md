@@ -21,6 +21,7 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
 - **🔐 Authentication**: JWT-based auth + API Keys for programmatic access
 - **✅ JSON Schema Validation**: Validate requests against OpenAPI-style schemas
 - **🎨 Handlebars Templating**: Dynamic responses with `{{params.id}}`, `{{query.name}}`, etc.
+- **✨ Faker.js Integration**: Generate realistic mock data with `{{faker.person.fullName}}`, etc.
 - **📄 OpenAPI Import**: Drag & drop Swagger/OpenAPI 3.0 specs to auto-generate mocks
 - **🪝 Webhooks**: Fire HTTP notifications with retry logic and exponential backoff
 - **🔷 GraphQL Support**: Mock GraphQL queries and mutations
@@ -28,6 +29,7 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
 - **🔒 Security**: Helmet, rate limiting (per-workspace), CORS protection
 - **⚡ Conditional Responses**: Match responses based on query params, headers, or body
 - **🧪 Comprehensive Testing**: 80%+ test coverage with Jest, Vitest, and Playwright
+- **📝 Audit Logs**: Track all changes with user, IP, and timestamp
 
 ### Production Features 🚀
 - **🎨 Dark Mode**: Full light/dark theme support with system preference detection
@@ -57,7 +59,9 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
 - **TypeScript** - Type-safe development
 - **Axios** - HTTP client
 - **Recharts** - Analytics visualization
+- **Monaco Editor** - VS Code-like code editor
 - **Vitest** - Unit testing for React components
+- **@faker-js/faker** - Fake data generation
 
 ### Infrastructure
 - **Docker** - Containerization

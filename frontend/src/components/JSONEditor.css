@@ -1,0 +1,38 @@
+.json-editor-container {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.json-editor-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  justify-content: flex-end;
+}
+
+.json-editor-toolbar .btn {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+/* Monaco Editor overrides for better integration */
+.json-editor-container .monaco-editor {
+  --vscode-editor-background: var(--bg-secondary) !important;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .json-editor-container {
+    background: #1e1e1e;
+  }
+
+  .json-editor-toolbar {
+    background: #252526;
+    border-bottom-color: #3e3e42;
+  }
+}
+

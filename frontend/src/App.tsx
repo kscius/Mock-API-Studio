@@ -18,6 +18,7 @@ import { WorkspacesPage } from './pages/WorkspacesPage';
 import { OpenApiImportPage } from './pages/OpenApiImportPage';
 import { WebhooksPage } from './pages/WebhooksPage';
 import { GraphQLTesterPage } from './pages/GraphQLTesterPage';
+import { AuditLogsPage } from './pages/AuditLogsPage';
 import './App.css';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -52,6 +53,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
                 <Link to="/analytics" className={location.pathname === '/analytics' ? 'active' : ''}>
                   Analytics
+                </Link>
+                <Link to="/audit-logs" className={location.pathname === '/audit-logs' ? 'active' : ''}>
+                  Audit Logs
                 </Link>
                 <Link to="/profile" className={location.pathname === '/profile' ? 'active' : ''}>
                   Profile
@@ -184,6 +188,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <GraphQLTesterPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/audit-logs"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <AuditLogsPage />
             </AppLayout>
           </ProtectedRoute>
         }
