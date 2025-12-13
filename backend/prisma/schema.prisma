@@ -8,18 +8,39 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
 model Workspace {
-  id             String          @id @default(uuid())
+  id             String             @id @default(uuid())
   name           String
-  slug           String          @unique
+  slug           String             @unique
   description    String?
-  isActive       Boolean         @default(true)
+  isActive       Boolean            @default(true)
   apiDefinitions ApiDefinition[]
   auditLogs      AuditLog[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  members        WorkspaceMember[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 
   @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        Role      @default(VIEWER)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
 }
 
 model ApiDefinition {
@@ -32,12 +53,17 @@ model ApiDefinition {
   basePath    String        @default("/")
   description String?
   isActive    Boolean       @default(true)
+  isLatest    Boolean       @default(true)
   tags        String[]
   endpoints   ApiEndpoint[]
+  // Versioning
+  parentId    String?       // Reference to previous version
+  parent      ApiDefinition? @relation("ApiVersions", fields: [parentId], references: [id], onDelete: SetNull)
+  versions    ApiDefinition[] @relation("ApiVersions")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  @@unique([workspaceId, slug])
+  @@unique([workspaceId, slug, version])
   @@map("api_definitions")
 }
 
@@ -64,16 +90,20 @@ model ApiEndpoint {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  password  String     // bcrypt hash
-  name      String?
-  role      String     @default("user") // user | admin
-  isActive  Boolean    @default(true)
-  apiKeys   ApiKey[]
-  auditLogs AuditLog[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id                String             @id @default(uuid())
+  email             String             @unique
+  password          String             // bcrypt hash
+  name              String?
+  role              String             @default("user") // user | admin (global role)
+  isActive          Boolean            @default(true)
+  // Two-Factor Authentication
+  twoFactorSecret   String?
+  twoFactorEnabled  Boolean            @default(false)
+  apiKeys           ApiKey[]
+  auditLogs         AuditLog[]
+  workspaceMemberships WorkspaceMember[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@map("users")
 }
@@ -84,7 +114,8 @@ model ApiKey {
   name        String   // nombre descriptivo
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  scope       String[] // qué APIs puede acceder, ["*"] = todas
+  scopes      String[] // e.g., ["read:apis", "write:endpoints"]
+  workspaceId String?  // Limit key to specific workspace
   isActive    Boolean  @default(true)
   lastUsedAt  DateTime?
   expiresAt   DateTime?

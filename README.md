@@ -2,7 +2,7 @@
 
 A complete enterprise-grade solution for designing, managing, and serving mock APIs with multi-tenancy, webhooks, GraphQL support, and comprehensive testing.
 
-> **⭐ PRODUCTION-READY**: Now with 80%+ test coverage, configurable caching, webhook retries, dark mode, Prometheus metrics, CI/CD pipeline, and Kubernetes manifests. See [PRODUCTION_HARDENING_SUMMARY.md](./PRODUCTION_HARDENING_SUMMARY.md) for details.
+> **⭐ PRODUCTION-READY**: Now with 80%+ test coverage, configurable caching, webhook retries, dark mode, Prometheus metrics, CI/CD pipeline, and Kubernetes manifests.
 
 ## 🚀 Features
 
@@ -18,7 +18,12 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
 - **Docker Ready**: Complete Docker Compose setup for easy deployment
 
 ### Advanced Features ⭐
-- **🔐 Authentication**: JWT-based auth + API Keys for programmatic access
+- **🔐 Authentication & Authorization**: 
+  - JWT-based authentication + API Keys for programmatic access
+  - **RBAC (Role-Based Access Control)**: ADMIN, EDITOR, and VIEWER roles per workspace
+  - **API Key Scopes**: Fine-grained permissions (read, write, delete) per resource
+  - **Two-Factor Authentication (2FA)**: TOTP-based additional security layer
+- **📦 API Versioning**: Create and manage multiple versions of your APIs
 - **✅ JSON Schema Validation**: Validate requests against OpenAPI-style schemas
 - **🎨 Handlebars Templating**: Dynamic responses with `{{params.id}}`, `{{query.name}}`, etc.
 - **✨ Faker.js Integration**: Generate realistic mock data with `{{faker.person.fullName}}`, etc.

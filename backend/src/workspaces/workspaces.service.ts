@@ -1,8 +1,11 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { RedisService } from '../common/redis/redis.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
+import { AddMemberDto } from './dto/add-member.dto';
+import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class WorkspacesService {
@@ -112,6 +115,163 @@ export class WorkspacesService {
     }
 
     return workspace;
+  }
+
+  // ========== WORKSPACE MEMBERS ==========
+
+  /**
+   * Get all members of a workspace
+   */
+  async getMembers(workspaceId: string) {
+    await this.findOne(workspaceId); // Verify workspace exists
+
+    return this.prisma.workspaceMember.findMany({
+      where: { workspaceId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            isActive: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  /**
+   * Add a member to workspace
+   */
+  async addMember(workspaceId: string, dto: AddMemberDto) {
+    await this.findOne(workspaceId); // Verify workspace exists
+
+    // Find user by email
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with email ${dto.email} not found`);
+    }
+
+    // Check if already a member
+    const existing = await this.prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId,
+          userId: user.id,
+        },
+      },
+    });
+
+    if (existing) {
+      throw new ConflictException('User is already a member of this workspace');
+    }
+
+    return this.prisma.workspaceMember.create({
+      data: {
+        workspaceId,
+        userId: user.id,
+        role: dto.role || Role.VIEWER,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Update member role
+   */
+  async updateMemberRole(workspaceId: string, memberId: string, dto: UpdateMemberRoleDto) {
+    await this.findOne(workspaceId); // Verify workspace exists
+
+    const member = await this.prisma.workspaceMember.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!member || member.workspaceId !== workspaceId) {
+      throw new NotFoundException('Member not found in this workspace');
+    }
+
+    return this.prisma.workspaceMember.update({
+      where: { id: memberId },
+      data: { role: dto.role },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Remove member from workspace
+   */
+  async removeMember(workspaceId: string, memberId: string) {
+    await this.findOne(workspaceId); // Verify workspace exists
+
+    const member = await this.prisma.workspaceMember.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!member || member.workspaceId !== workspaceId) {
+      throw new NotFoundException('Member not found in this workspace');
+    }
+
+    await this.prisma.workspaceMember.delete({
+      where: { id: memberId },
+    });
+
+    return { message: 'Member removed successfully' };
+  }
+
+  /**
+   * Get user's role in a workspace
+   */
+  async getUserRole(workspaceId: string, userId: string): Promise<Role | null> {
+    const member = await this.prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId,
+          userId,
+        },
+      },
+    });
+
+    return member ? member.role : null;
+  }
+
+  /**
+   * Check if user has permission in workspace
+   */
+  async hasPermission(workspaceId: string, userId: string, requiredRole: Role): Promise<boolean> {
+    const userRole = await this.getUserRole(workspaceId, userId);
+    
+    if (!userRole) {
+      return false;
+    }
+
+    // Permission hierarchy: ADMIN > EDITOR > VIEWER
+    const roleHierarchy = {
+      [Role.ADMIN]: 3,
+      [Role.EDITOR]: 2,
+      [Role.VIEWER]: 1,
+    };
+
+    return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
   }
 }
 

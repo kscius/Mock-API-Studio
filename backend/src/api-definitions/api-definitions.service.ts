@@ -294,6 +294,86 @@ export class ApiDefinitionsService {
     return this.findOneById(apiRecord.id);
   }
 
+  // ========== API VERSIONING ==========
+
+  async createVersion(apiId: string, newVersion: string) {
+    const originalApi = await this.prisma.apiDefinition.findUnique({
+      where: { id: apiId },
+      include: { endpoints: true },
+    });
+
+    if (!originalApi) {
+      throw new Error(`API with ID ${apiId} not found`);
+    }
+
+    // Mark the original API as not latest
+    await this.prisma.apiDefinition.update({
+      where: { id: apiId },
+      data: { isLatest: false },
+    });
+
+    // Create new version
+    const newApi = await this.prisma.apiDefinition.create({
+      data: {
+        workspaceId: originalApi.workspaceId,
+        name: originalApi.name,
+        slug: originalApi.slug,
+        version: newVersion,
+        basePath: originalApi.basePath,
+        description: originalApi.description,
+        isActive: originalApi.isActive,
+        isLatest: true,
+        tags: originalApi.tags,
+        parentId: originalApi.id,
+        endpoints: {
+          create: originalApi.endpoints.map((ep) => ({
+            method: ep.method,
+            path: ep.path,
+            summary: ep.summary,
+            requestSchema: ep.requestSchema as any,
+            responses: ep.responses as any,
+            delayMs: ep.delayMs,
+            enabled: ep.enabled,
+            type: ep.type,
+            operationName: ep.operationName,
+            operationType: ep.operationType,
+          })),
+        },
+      },
+      include: { endpoints: true },
+    });
+
+    // Invalidate cache
+    await this.invalidateApiCache(originalApi.workspaceId, originalApi.slug);
+
+    return newApi;
+  }
+
+  async getVersions(apiId: string) {
+    const api = await this.prisma.apiDefinition.findUnique({
+      where: { id: apiId },
+      select: { slug: true, workspaceId: true },
+    });
+
+    if (!api) {
+      throw new Error(`API with ID ${apiId} not found`);
+    }
+
+    // Get all versions of this API (same slug and workspace)
+    return this.prisma.apiDefinition.findMany({
+      where: {
+        slug: api.slug,
+        workspaceId: api.workspaceId,
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: {
+          select: { endpoints: true },
+        },
+      },
+    });
+  }
+
   // ========== CACHE HELPERS ==========
 
   private async invalidateApiCache(workspaceId: string, slug: string) {

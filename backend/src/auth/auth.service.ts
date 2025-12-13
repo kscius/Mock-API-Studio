@@ -43,7 +43,7 @@ export class AuthService {
     };
   }
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string, twoFactorToken?: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (!user || !user.isActive) {
@@ -53,6 +53,28 @@ export class AuthService {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Check if 2FA is enabled
+    if (user.twoFactorEnabled) {
+      if (!twoFactorToken) {
+        // Return a special response indicating 2FA is required
+        return {
+          requiresTwoFactor: true,
+          message: 'Two-factor authentication is required',
+        };
+      }
+
+      // Verify 2FA token
+      const { authenticator } = await import('otplib');
+      const isValid = authenticator.verify({
+        token: twoFactorToken,
+        secret: user.twoFactorSecret!,
+      });
+
+      if (!isValid) {
+        throw new UnauthorizedException('Invalid two-factor authentication code');
+      }
     }
 
     const token = this.generateToken(user);

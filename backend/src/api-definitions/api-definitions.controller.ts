@@ -170,6 +170,24 @@ export class ApiDefinitionsController {
     return this.service.importApi(parsed, workspaceId, false);
   }
 
+  // ========== API VERSIONING ==========
+
+  @Post(':apiId/versions')
+  async createVersion(
+    @Param('apiId') apiId: string,
+    @Body('version') version: string,
+  ) {
+    if (!version) {
+      throw new BadRequestException('Version is required');
+    }
+    return this.service.createVersion(apiId, version);
+  }
+
+  @Get(':apiId/versions')
+  async getVersions(@Param('apiId') apiId: string) {
+    return this.service.getVersions(apiId);
+  }
+
   @Post('import/openapi/upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadOpenApi(

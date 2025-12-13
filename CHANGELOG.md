@@ -5,218 +5,254 @@ All notable changes to Mock API Studio will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2024-12-12
+## [Phase 17] - 2024-12-13
 
-### Added - Phase 16 (Frontend Enhancements)
-- **Audit Logs UI**:
-  - Complete audit logs page (`/admin/audit-logs`)
-  - Table with pagination (20 entries per page)
-  - Advanced filters (action, entity type, date range)
-  - Expandable rows for detailed view
-  - Export functionality (CSV + JSON)
-  - Colored action badges (create, update, delete, duplicate)
-  - IP address and user agent tracking
-  - Dark mode support
+### Added - Security & Governance
 
-- **Faker.js Method Browser**:
-  - Modal interface with real-time search
-  - Module sidebar with method counts
-  - Method list with syntax preview
-  - Insert at cursor functionality
-  - Copy to clipboard feature
-  - Integration in endpoint editor
-  - Searchable across all modules and methods
+#### RBAC (Role-Based Access Control)
+- **Data Model**: New `WorkspaceMember` model with `ADMIN`, `EDITOR`, and `VIEWER` roles
+- **RolesGuard**: Custom guard for enforcing workspace-level permissions
+- **Decorators**: `@Roles()` and `@WorkspaceIdParam()` for declarative permission control
+- **API Endpoints**:
+  - `GET /admin/workspaces/:id/members` - List workspace members
+  - `POST /admin/workspaces/:id/members` - Invite member with role
+  - `PATCH /admin/workspaces/:id/members/:memberId` - Update member role
+  - `DELETE /admin/workspaces/:id/members/:memberId` - Remove member
+- **Frontend**: Workspace members management UI with role selection and invitations
 
-- **Faker.js Live Preview**:
-  - `ResponsePreview` component
-  - Side-by-side template vs output comparison
-  - Backend `/faker-docs/render` endpoint
-  - Generate/Regenerate functionality
-  - Copy rendered output
-  - Error handling for templates
+#### API Key Scopes
+- **Enhanced API Key Model**: Added `scopes` array and `workspaceId` fields
+- **Scope System**: 14 predefined scopes (read/write/delete for apis, endpoints, workspaces, etc.)
+- **ScopesGuard**: Validates API key permissions before allowing access
+- **Wildcard Support**: Scopes like `read:*` or `*:apis` for flexible permissions
+- **Frontend**: API Keys management page with scope selection UI
 
-- **Enhanced JSON Editor (Monaco Editor)**:
-  - VS Code-like editing experience
-  - Syntax highlighting for JSON
-  - Bracket pair colorization
-  - Format on paste/type
-  - Line numbers
-  - Autocomplete for Faker.js placeholders
-  - Dark mode support
-  - Insert text at cursor position
+#### API Versioning
+- **Data Model**: Added `isLatest`, `parentId` fields to `ApiDefinition` for version tracking
+- **Service Methods**:
+  - `createVersion(apiId, newVersion)` - Create new version copying all endpoints
+  - `getVersions(apiId)` - List all versions of an API
+- **API Endpoints**:
+  - `POST /admin/api-definitions/:apiId/versions` - Create new version
+  - `GET /admin/api-definitions/:apiId/versions` - List versions
+- **Frontend**: `ApiVersionsPanel` component for version management
 
-- **Template Variables Panel**:
-  - Collapsible panel with 5 variable groups
-  - Dynamic path parameter extraction
-  - Query parameters examples
-  - Request body variables
-  - Request headers
-  - Special variables (timestamp, uuid, etc.)
-  - Insert and copy functionality
-  - Examples for each variable type
+#### Two-Factor Authentication (2FA)
+- **Data Model**: Added `twoFactorSecret` and `twoFactorEnabled` fields to `User`
+- **TwoFactorService**: TOTP generation, QR code creation, token verification
+- **API Endpoints**:
+  - `POST /auth/2fa/setup` - Generate secret and QR code
+  - `POST /auth/2fa/enable` - Enable 2FA after token verification
+  - `DELETE /auth/2fa/disable` - Disable 2FA with token verification
+  - `GET /auth/2fa/status` - Check 2FA status
+- **Login Flow**: Updated to support 2FA token verification
+- **Frontend**: Complete 2FA setup/disable UI with QR code display
 
-### Changed
-- `EndpointEditorPage` now uses Monaco Editor instead of textarea
-- Improved response body editing experience
-- Better dark mode support across all new components
+### Backend
+- **Dependencies**: Added `otplib`, `qrcode`, `@types/qrcode` for 2FA
+- **Migrations**: 3 new migrations for RBAC, API Key Scopes, Versioning, and 2FA
+- **Tests**: Unit tests for `RolesGuard`, `ScopesGuard`, and `TwoFactorService`
 
-### Testing
-- Added 4 new test suites with 60+ tests:
-  - `FakerMethodBrowser.test.tsx` (16 tests)
-  - `ResponsePreview.test.tsx` (14 tests)
-  - `TemplateVariablesPanel.test.tsx` (12 tests)
-  - `AuditLogsPage.test.tsx` (14 tests)
-
-### Dependencies
-- Added `@monaco-editor/react` for enhanced code editing
-
-## [1.2.0] - 2024-12-11
-
-### Added - Phase 15 (Developer Experience)
-- **CLI Tool (`@mock-api-studio/cli`)**:
-  - Complete command-line interface for managing Mock API Studio
-  - Commands: `login`, `logout`, `config`, `workspace`, `api`, `import`
-  - Interactive prompts with `inquirer`
-  - Colored terminal output with `chalk`
-  - Loading spinners with `ora`
-  - Table formatting with `cli-table3`
-  - JWT and API key authentication
-  - Config storage in `~/.mock-api/config.json`
-  - Workspace context management
-  - OpenAPI import from CLI
-  - Comprehensive CLI documentation
-
-- **Faker.js Templating**:
-  - Dynamic data generation in mock responses
-  - Support for `{{faker.module.method}}` syntax
-  - Custom Handlebars helper for Faker.js
-  - Recursive processing for nested objects and arrays
-  - `/faker-docs/methods` endpoint for available methods
-  - `FakerTemplatingService` with `render()` and `hasFakerPlaceholders()`
-  - Comprehensive Faker usage documentation (`FAKER_USAGE.md`)
-
-- **Endpoint Duplication**:
-  - `POST /api-definitions/endpoints/:endpointId/duplicate`
-  - Copy all endpoint properties (responses, schema, delay, etc.)
-  - Auto-increment path with `-copy-{timestamp}`
-  - Frontend modal for path/summary customization
-  - Duplicate button in endpoint editor
-
-- **Swagger UI Integration**:
-  - `GET /admin/api-definitions/:apiId/openapi.json` endpoint
-  - Generate OpenAPI 3.0 spec from stored endpoints
-  - Interactive Swagger UI in frontend
-  - "API Docs" tab in API detail page
-  - Execute requests directly from Swagger UI
-
-- **Audit Logs**:
-  - `AuditLog` model with user, action, entity tracking
-  - `AuditLogInterceptor` for automatic logging
-  - `@AuditLog` decorator for declarative logging
-  - Track: create, update, delete, duplicate actions
-  - IP address and user-agent capture
-  - JWT-based user identification
-  - `GET /admin/audit-logs` with filters (workspace, user, action, date)
-  - Daily cleanup cron job (90-day retention)
-  - Pagination and sorting support
+### Frontend
+- **New Pages**:
+  - `WorkspaceMembersPage.tsx` - Manage team members and roles
+  - `ApiKeysPage.tsx` - Create and manage API keys with scopes
+  - `TwoFactorAuthPage.tsx` - Setup and manage 2FA
+- **New Components**:
+  - `ApiVersionsPanel.tsx` - Version selector and creator
+- **Router**: Added routes for `/workspaces/:id/members`, `/api-keys`, `/2fa`
 
 ### Changed
-- Updated root `package.json` with CLI scripts (`dev:cli`, `build:cli`, `test:cli`)
-- Enhanced `README.md` with CLI usage section
-- Updated project structure documentation
-- Jest configuration to support ES modules (`@faker-js/faker`)
+- **WorkspacesController**: Added member management endpoints with RBAC guards
+- **AuthService**: Enhanced login method to support 2FA token verification
+- **ApiDefinitionsService**: Added versioning methods
+- **Unique Constraint**: Changed from `(workspaceId, slug)` to `(workspaceId, slug, version)`
 
-### Fixed
-- TypeScript type issues with Prisma `JsonValue` in endpoint duplication
-- Handlebars escaping issues with Faker.js placeholders
-
-## [1.1.0] - 2024-01-15
-
-### Added - Phases 11-14 (Production Hardening)
-- Dark mode with system preference detection
-- Prometheus metrics for monitoring
-- CI/CD pipeline with GitHub Actions
-- Kubernetes deployment manifests
-- Configurable cache TTL and rate limiting
-- Webhook retry logic with exponential backoff
-- Analytics data retention cleanup
-- Toast notifications with `react-hot-toast`
-
-### Added - Phases 6-10
-- Comprehensive testing (Jest, Vitest, Playwright)
-- OpenAPI upload UI (drag & drop)
-- Multi-tenancy (Workspaces)
-- Webhooks with retry logic
-- GraphQL mock support
-
-## [1.0.0] - 2024-01-01
-
-### Added
-- Initial release of Mock API Studio
-- **Backend Features:**
-  - NestJS-based REST API
-  - Prisma ORM with PostgreSQL
-  - Redis caching for API definitions
-  - Full CRUD for API definitions and endpoints
-  - Import/Export API definitions as JSON
-  - Mock runtime with catch-all route handler
-  - Path parameter support (e.g., `/users/:id`)
-  - Multiple response configurations per endpoint
-  - Configurable response delays
-  - Enable/disable endpoints individually
-  - Automatic database migrations
-  - Seed data with example APIs (JSONPlaceholder, GitHub Mock)
-
-- **Frontend Features:**
-  - React + Vite + TypeScript SPA
-  - Dashboard for managing APIs
-  - API detail page with endpoint management
-  - Endpoint editor with multi-response support
-  - Import/Export UI functionality
-  - Responsive design
-  - Clean, modern UI
-
-- **Infrastructure:**
-  - Docker Compose setup with 4 services
-  - Multi-stage Docker builds for optimization
-  - Nginx reverse proxy for frontend
-  - PostgreSQL database with persistent volumes
-  - Redis cache with health checks
-  - Development and production configurations
-
-- **Documentation:**
-  - Comprehensive README with quick start guide
-  - Architecture documentation
-  - Contributing guidelines
-  - Example API definitions
-  - Development scripts
-
-### Technical Details
-- **Backend Stack:** NestJS, TypeScript, Prisma, PostgreSQL, Redis, path-to-regexp
-- **Frontend Stack:** React, TypeScript, Vite, React Router, Axios
-- **DevOps:** Docker, Docker Compose, Nginx
-
-### Known Limitations
-- No authentication/authorization
-- CORS enabled for all origins (development mode)
-- No rate limiting
-- No request validation against schemas
-- No response templating
-
-## [Unreleased]
-
-### Planned Features
-- [ ] User authentication and API keys
-- [ ] OpenAPI/Swagger import
-- [ ] Response templating (Handlebars)
-- [ ] Request validation based on JSON Schema
-- [ ] Rate limiting
-- [ ] API analytics and usage metrics
-- [ ] Webhook support
-- [ ] Dark mode
-- [ ] Export to Postman collections
+### Security
+- **Permission Model**: Hierarchical role system (ADMIN > EDITOR > VIEWER)
+- **API Key Security**: Scoped permissions prevent overly permissive keys
+- **2FA Protection**: Optional additional security layer for user accounts
+- **Audit Trail**: All RBAC changes logged in audit logs
 
 ---
 
-[1.0.0]: https://github.com/username/mock-api-studio/releases/tag/v1.0.0
+## [Phase 16] - 2024-12-12
 
+### Added - Frontend Enhancements
+
+#### Faker.js Integration
+- **FakerMethodBrowser Component**: Modal for browsing and inserting Faker.js methods
+- **ResponsePreview Component**: Live preview of rendered Faker.js templates
+- **Backend Endpoint**: `POST /faker-docs/render` for server-side template rendering
+
+#### Enhanced JSON Editor
+- **Monaco Editor Integration**: Replaced `textarea` with VS Code-like editor
+- **Features**: Syntax highlighting, bracket matching, auto-formatting, error detection
+- **Insert at Cursor**: Support for inserting Faker.js placeholders at cursor position
+
+#### Template Variables Panel
+- **Dynamic Panel**: Shows available Handlebars variables based on endpoint path
+- **Categories**: Path params, query params, body, headers, special variables
+- **Insert & Copy**: Quick insertion and clipboard support
+
+#### Audit Logs UI
+- **AuditLogsPage Component**: Full audit log viewer with filters
+- **Filters**: Date range, user, action, entity type
+- **Expandable Rows**: View full change details including before/after state
+- **Pagination & Sorting**: Handle large datasets efficiently
+
+### Changed
+- **EndpointEditorPage**: Integrated all new components (Faker Browser, Monaco Editor, Template Vars)
+- **Response Body Editor**: Now uses Monaco Editor instead of native `textarea`
+
+---
+
+## [Phase 15] - 2024-12-11
+
+### Added - Developer Experience
+
+#### Response Templating with Faker.js
+- **FakerTemplatingService**: Backend service for processing `{{faker.module.method}}` placeholders
+- **Handlebars Helper**: `{{faker "path.to.method"}}` syntax support
+- **Available Methods Endpoint**: `GET /faker-docs` lists all available Faker.js modules
+- **Documentation**: `FAKER_USAGE.md` with examples
+
+#### Endpoint Duplication
+- **Backend**: `POST /api-definitions/endpoints/:endpointId/duplicate`
+- **Auto-increment Path**: Adds `-copy` suffix or custom path
+- **Frontend**: "Duplicate" button with editable fields modal
+
+#### Interactive Swagger UI
+- **OpenAPI Spec Generation**: `GET /admin/api-definitions/:apiId/openapi.json`
+- **Swagger UI Integration**: Embedded in API detail page
+- **Live Execution**: Execute requests directly from Swagger UI
+
+#### CLI Tool
+- **Package**: `@mock-api-studio/cli` with `mock-api` binary
+- **Commands**:
+  - `login/logout` - Authentication
+  - `workspace list/create/select` - Workspace management
+  - `api list/create/delete` - API management
+  - `import <file>` - OpenAPI import
+  - `config` - Show configuration
+- **Authentication**: JWT or API Key support
+- **Config Storage**: `~/.mock-api/config.json`
+
+#### Audit Logs
+- **AuditLog Model**: Tracks create/update/delete actions
+- **AuditLogInterceptor**: Automatic logging via `@AuditLog` decorator
+- **Endpoints**: `GET /admin/audit-logs` with filters and pagination
+- **Cleanup Job**: Auto-delete logs older than 90 days
+
+---
+
+## [Phases 11-14] - 2024-12-10
+
+### Added - Production Hardening
+
+#### Dark Mode
+- **ThemeContext**: React context for theme management
+- **CSS Variables**: Dynamic theming support
+- **System Preference**: Auto-detect OS theme
+- **Toggle Component**: In-app theme switcher
+
+#### Toast Notifications
+- **react-hot-toast**: Centralized notification system
+- **Axios Interceptor**: Automatic error notifications
+- **Custom Styling**: Theme-aware toast appearance
+
+#### Prometheus Metrics
+- **MetricsService**: HTTP, webhook, cache, runtime metrics
+- **Endpoint**: `GET /metrics` in Prometheus format
+- **Grafana Dashboard**: Pre-configured dashboard JSON
+
+#### CI/CD Pipeline
+- **GitHub Actions**: `.github/workflows/ci-cd.yml`
+- **Jobs**: Linting, testing, Docker build/push
+- **Automatic**: Triggers on push to `main` and pull requests
+
+#### Kubernetes Deployment
+- **Manifests**: Complete K8s YAML files
+- **Components**: Backend, Frontend, PostgreSQL, Redis deployments
+- **Features**: Health probes, auto-scaling, ConfigMaps, Secrets
+
+### Changed
+- **Configurable Settings**: Cache TTL, rate limits, analytics retention via env vars
+- **Error Handling**: Improved user-facing error messages
+- **Test Coverage**: Increased to 80%+
+
+---
+
+## [Phases 6-10] - 2024-12-09
+
+### Added
+
+#### Testing (Phase 6)
+- **Backend**: Jest unit and integration tests (coverage: 80%+)
+- **Frontend**: Vitest tests for React components
+- **E2E**: Playwright tests for critical user flows
+
+#### OpenAPI Upload UI (Phase 7)
+- **Drag & Drop**: File upload component
+- **Dry Run Mode**: Preview imports without persisting
+- **Backend**: `POST /admin/openapi/import/upload`
+
+#### Multi-tenancy (Phase 8)
+- **Workspace Model**: Logical isolation for teams
+- **Workspace-aware Endpoints**: All APIs scoped to workspaces
+- **Frontend**: Workspace selector and management UI
+
+#### Webhooks (Phase 9)
+- **WebhookSubscription Model**: Event-based notifications
+- **Retry Logic**: Exponential backoff for failed deliveries
+- **Frontend**: Webhook management UI
+
+#### GraphQL Support (Phase 10)
+- **GraphQL Mock Endpoints**: Support for queries and mutations
+- **Frontend**: GraphQL tester UI
+
+---
+
+## [Initial Release] - 2024-12-08
+
+### Added
+
+#### Core Features
+- **NestJS Backend**: RESTful API with Prisma ORM
+- **React Frontend**: Modern UI with React Router
+- **PostgreSQL Database**: Reliable data storage
+- **Redis Caching**: Fast response times
+- **Docker Setup**: Complete containerization
+
+#### API Management
+- **CRUD Operations**: Create, read, update, delete APIs and endpoints
+- **Dynamic Routing**: Path parameters support (`/users/:id`)
+- **Multiple Responses**: Conditional response matching
+- **JSON Schema Validation**: Request validation with AJV
+
+#### Mock Runtime
+- **Mock Serving**: HTTP endpoint for serving mocks
+- **Handlebars Templating**: Dynamic response generation
+- **Configurable Delays**: Simulate network latency
+- **Response Scenarios**: Multiple responses per endpoint
+
+#### Authentication
+- **JWT Authentication**: Secure user login
+- **API Keys**: Programmatic access
+- **User Management**: Registration and profile
+
+#### Analytics
+- **Request Tracking**: Log all mock requests
+- **Performance Metrics**: Response times and success rates
+- **Visualization**: Charts and graphs with Recharts
+
+#### Security
+- **Helmet**: Security headers
+- **Rate Limiting**: Per-workspace throttling
+- **CORS**: Cross-origin protection
+
+---
+
+## Future Roadmap
+
+See [ROADMAP.md](./ROADMAP.md) for upcoming features in Phases 18-20.

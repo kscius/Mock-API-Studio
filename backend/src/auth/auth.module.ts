@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { TwoFactorController } from './controllers/two-factor.controller';
+import { TwoFactorService } from './services/two-factor.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule } from '../config/config.module';
 import { ConfigService } from '../config/config.service';
@@ -20,9 +22,9 @@ import { ConfigService } from '../config/config.service';
       }),
     }),
   ],
-  providers: [AuthService, JwtStrategy],
-  controllers: [AuthController],
-  exports: [AuthService, JwtStrategy, PassportModule],
+  providers: [AuthService, TwoFactorService, JwtStrategy],
+  controllers: [AuthController, TwoFactorController],
+  exports: [AuthService, TwoFactorService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
 

@@ -15,6 +15,9 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { WorkspacesPage } from './pages/WorkspacesPage';
+import { WorkspaceMembersPage } from './pages/WorkspaceMembersPage';
+import { ApiKeysPage } from './pages/ApiKeysPage';
+import { TwoFactorAuthPage } from './pages/TwoFactorAuthPage';
 import { OpenApiImportPage } from './pages/OpenApiImportPage';
 import { WebhooksPage } from './pages/WebhooksPage';
 import { GraphQLTesterPage } from './pages/GraphQLTesterPage';
@@ -57,8 +60,14 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link to="/audit-logs" className={location.pathname === '/audit-logs' ? 'active' : ''}>
                   Audit Logs
                 </Link>
+                <Link to="/api-keys" className={location.pathname === '/api-keys' ? 'active' : ''}>
+                  API Keys
+                </Link>
                 <Link to="/profile" className={location.pathname === '/profile' ? 'active' : ''}>
                   Profile
+                </Link>
+                <Link to="/2fa" className={location.pathname === '/2fa' ? 'active' : ''}>
+                  2FA
                 </Link>
                 <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <ThemeToggle />
@@ -198,6 +207,36 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <AuditLogsPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workspaces/:workspaceId/members"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <WorkspaceMembersPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/api-keys"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ApiKeysPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/2fa"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <TwoFactorAuthPage />
             </AppLayout>
           </ProtectedRoute>
         }

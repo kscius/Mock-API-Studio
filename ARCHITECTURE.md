@@ -225,20 +225,102 @@ Client → GET /mock/jsonplaceholder/posts/1
     → Return response
 ```
 
-## Security Considerations
+## Security & Authorization
 
-### Current Implementation
-- CORS enabled for all origins (development)
-- No authentication/authorization
-- Input validation via class-validator
+### Authentication
+Mock API Studio supports two authentication methods:
 
-### Production Recommendations
-- Restrict CORS to specific origins
-- Add API authentication (JWT, API keys)
-- Rate limiting on mock runtime endpoints
-- Input sanitization for JSON imports
-- PostgreSQL connection pooling
-- Redis connection pooling
+#### 1. JWT (JSON Web Tokens)
+- **Used for**: Web UI user sessions
+- **Login**: `POST /auth/login` with email/password
+- **Registration**: `POST /auth/register`
+- **Token Expiry**: 7 days (configurable via JWT_SECRET)
+- **2FA Support**: Optional TOTP-based two-factor authentication
+  - `POST /auth/2fa/setup` - Generate QR code
+  - `POST /auth/2fa/enable` - Enable with token verification
+  - `DELETE /auth/2fa/disable` - Disable with token verification
+
+#### 2. API Keys
+- **Used for**: CLI and programmatic access
+- **Creation**: `POST /auth/api-keys` (requires JWT)
+- **Scopes**: Fine-grained permissions (read/write/delete per resource)
+- **Header**: `X-API-Key: mas_...` in requests
+- **Scoped Permissions**:
+  - `read:apis`, `write:apis`, `delete:apis`
+  - `read:endpoints`, `write:endpoints`, `delete:endpoints`
+  - `read:workspaces`, `write:workspaces`, `admin:workspace`
+  - `read:analytics`, `read:webhooks`, `write:webhooks`
+  - `*` (all permissions)
+
+### Authorization (RBAC)
+
+#### Workspace-Level Roles
+Mock API Studio implements role-based access control at the workspace level:
+
+| Role | Permissions |
+|------|-------------|
+| **ADMIN** | Full access: create, read, update, delete APIs/endpoints, manage workspace settings and members |
+| **EDITOR** | Create, read, update APIs and endpoints (cannot delete workspace or manage members) |
+| **VIEWER** | Read-only access to APIs, endpoints, and analytics |
+
+#### Permission Hierarchy
+- Roles are hierarchical: `ADMIN` > `EDITOR` > `VIEWER`
+- Higher roles inherit permissions from lower roles
+- Example: An `ADMIN` can perform all `EDITOR` and `VIEWER` actions
+
+#### Workspace Membership
+- Users can be members of multiple workspaces with different roles
+- Global admins (user.role = 'admin') bypass workspace-level checks
+- Workspace members are managed via:
+  - `POST /admin/workspaces/:id/members` - Invite user with role
+  - `PATCH /admin/workspaces/:id/members/:memberId` - Update role
+  - `DELETE /admin/workspaces/:id/members/:memberId` - Remove member
+
+### Guards & Decorators
+
+#### RolesGuard
+```typescript
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN, Role.EDITOR)
+async updateEndpoint(@Param('id') id: string, @Body() dto: UpdateEndpointDto) {
+  // Only ADMIN or EDITOR can access this
+}
+```
+
+#### ScopesGuard (for API Keys)
+```typescript
+@UseGuards(ApiKeyGuard, ScopesGuard)
+@RequireScopes(ApiScope.WRITE_APIS)
+async createApi(@Body() dto: CreateApiDto) {
+  // API key must have 'write:apis' scope
+}
+```
+
+### API Versioning
+- **Data Model**: `ApiDefinition.version`, `ApiDefinition.parentId`
+- **Unique Constraint**: `(workspaceId, slug, version)`
+- **Create Version**: `POST /admin/api-definitions/:apiId/versions`
+  - Copies all endpoints from current version
+  - Marks new version as `isLatest`
+  - Previous version remains accessible
+- **List Versions**: `GET /admin/api-definitions/:apiId/versions`
+
+### Audit Logging
+All mutations (create, update, delete) are automatically logged:
+- **Logged Information**: User ID, IP address, user agent, action, entity type, entity ID, changes (before/after)
+- **Decorator**: `@AuditLog({ action: 'create', entityType: 'api', ... })`
+- **Query Logs**: `GET /admin/audit-logs` with filters (workspace, user, action, date range)
+- **Retention**: Automatic cleanup of logs older than 90 days (configurable)
+
+### Security Best Practices
+- **CORS**: Restricted to specific origins in production
+- **Helmet**: Security headers enabled
+- **Rate Limiting**: Per-workspace throttling on mock runtime
+- **Input Validation**: class-validator on all DTOs
+- **Password Hashing**: bcrypt with salt rounds = 10
+- **2FA**: TOTP-based additional security layer
+- **API Key Storage**: Hashed with bcrypt, raw key shown only once
+- **Connection Pooling**: PostgreSQL and Redis connection limits
 
 ## Scalability
 
