@@ -42,6 +42,12 @@ export const apiDefinitionsApi = {
   exportApi: (apiId: string) =>
     apiClient.get(`/api-definitions/${apiId}/export`),
   
+  exportPostman: (apiId: string) =>
+    apiClient.get(`/api-definitions/${apiId}/export/postman`),
+
+  exportInsomnia: (apiId: string) =>
+    apiClient.get(`/api-definitions/${apiId}/export/insomnia`),
+
   importApi: (data: any, workspaceId: string, overwrite = false) =>
     apiClient.post(`/api-definitions/import?workspaceId=${workspaceId}&overwrite=${overwrite}`, data),
 

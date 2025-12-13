@@ -23,11 +23,13 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
   - **RBAC (Role-Based Access Control)**: ADMIN, EDITOR, and VIEWER roles per workspace
   - **API Key Scopes**: Fine-grained permissions (read, write, delete) per resource
   - **Two-Factor Authentication (2FA)**: TOTP-based additional security layer
+  - **OAuth2/OIDC Login**: Sign in with GitHub and Google
 - **📦 API Versioning**: Create and manage multiple versions of your APIs
 - **✅ JSON Schema Validation**: Validate requests against OpenAPI-style schemas
 - **🎨 Handlebars Templating**: Dynamic responses with `{{params.id}}`, `{{query.name}}`, etc.
 - **✨ Faker.js Integration**: Generate realistic mock data with `{{faker.person.fullName}}`, etc.
 - **📄 OpenAPI Import**: Drag & drop Swagger/OpenAPI 3.0 specs to auto-generate mocks
+- **📤 Collection Export**: Export APIs as Postman or Insomnia collections
 - **🪝 Webhooks**: Fire HTTP notifications with retry logic and exponential backoff
 - **🔷 GraphQL Support**: Mock GraphQL queries and mutations
 - **📊 Analytics**: Request tracking, metrics, performance stats, and automated retention cleanup
@@ -39,6 +41,8 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
 ### Production Features 🚀
 - **🎨 Dark Mode**: Full light/dark theme support with system preference detection
 - **🔔 Toast Notifications**: Centralized error handling with user-friendly messages
+- **📢 Slack Integration**: Real-time notifications for API events (created, deleted, rate limits, etc.)
+- **🔗 GitHub Actions Integration**: Automate API imports and deployments in CI/CD pipelines
 - **📈 Prometheus Metrics**: HTTP, webhook, cache, and runtime metrics for monitoring
 - **⚙️ Configurable**: Cache TTL, rate limits, webhook retries, analytics retention via env vars
 - **🔄 CI/CD Pipeline**: GitHub Actions workflow with automated testing and Docker builds

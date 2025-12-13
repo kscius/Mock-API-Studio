@@ -21,6 +21,8 @@ import { UpdateEndpointDto } from './dto/update-endpoint.dto';
 import { DuplicateEndpointDto } from './dto/duplicate-endpoint.dto';
 import { OpenApiParserService } from '../openapi/openapi-parser.service';
 import { OpenApiGeneratorService } from '../openapi/openapi-generator.service';
+import { PostmanExportService } from './services/postman-export.service';
+import { InsomniaExportService } from './services/insomnia-export.service';
 import { AuditLog } from '../audit-logs/decorators/audit-log.decorator';
 import { ConfigService } from '../config/config.service';
 
@@ -30,6 +32,8 @@ export class ApiDefinitionsController {
     private readonly service: ApiDefinitionsService,
     private readonly openApiParser: OpenApiParserService,
     private readonly openApiGenerator: OpenApiGeneratorService,
+    private readonly postmanExport: PostmanExportService,
+    private readonly insomniaExport: InsomniaExportService,
     private readonly config: ConfigService,
   ) {}
 
@@ -255,6 +259,34 @@ export class ApiDefinitionsController {
     } catch (error: any) {
       throw new BadRequestException(`Failed to parse OpenAPI: ${error.message}`);
     }
+  }
+
+  // ========== EXPORT INTEGRATIONS ==========
+
+  @Get(':apiId/export/postman')
+  async exportToPostman(@Param('apiId') apiId: string) {
+    const api = await this.service.findOneById(apiId);
+    if (!api) {
+      throw new BadRequestException('API not found');
+    }
+
+    const baseUrl = this.config.mockBaseUrl || process.env.MOCK_BASE_URL || 'http://localhost:3000';
+    const collection = this.postmanExport.generateCollection(api as any, baseUrl);
+
+    return collection;
+  }
+
+  @Get(':apiId/export/insomnia')
+  async exportToInsomnia(@Param('apiId') apiId: string) {
+    const api = await this.service.findOneById(apiId);
+    if (!api) {
+      throw new BadRequestException('API not found');
+    }
+
+    const baseUrl = this.config.mockBaseUrl || process.env.MOCK_BASE_URL || 'http://localhost:3000';
+    const collection = this.insomniaExport.generateCollection(api as any, baseUrl);
+
+    return collection;
   }
 }
 

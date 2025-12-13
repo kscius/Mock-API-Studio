@@ -5,6 +5,7 @@ import { apiDefinitionsApi } from '../api/api-definitions';
 import { ApiDefinition } from '../api/types';
 import { EndpointCard } from '../components/EndpointCard';
 import { SwaggerUIViewer } from '../components/SwaggerUIViewer';
+import toast from 'react-hot-toast';
 
 type TabType = 'endpoints' | 'docs';
 
@@ -16,6 +17,7 @@ export function ApiDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('endpoints');
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -53,6 +55,42 @@ export function ApiDetailPage() {
       await loadApi();
     } catch (err) {
       alert('Failed to update API');
+      console.error(err);
+    }
+  };
+
+  const handleExportPostman = async () => {
+    try {
+      const response = await apiDefinitionsApi.exportPostman(id!);
+      const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${api?.slug || 'api'}_postman_collection.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Postman collection exported!');
+      setShowExportMenu(false);
+    } catch (err: any) {
+      toast.error(`Export failed: ${err.response?.data?.message || err.message}`);
+      console.error(err);
+    }
+  };
+
+  const handleExportInsomnia = async () => {
+    try {
+      const response = await apiDefinitionsApi.exportInsomnia(id!);
+      const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${api?.slug || 'api'}_insomnia_collection.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Insomnia collection exported!');
+      setShowExportMenu(false);
+    } catch (err: any) {
+      toast.error(`Export failed: ${err.response?.data?.message || err.message}`);
       console.error(err);
     }
   };
@@ -128,9 +166,74 @@ export function ApiDetailPage() {
                   </span>
                 </div>
               </div>
-              <button className="btn btn-secondary" onClick={() => setEditMode(true)}>
-                Edit
-              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ position: 'relative' }}>
+                  <button 
+                    className="btn btn-secondary" 
+                    onClick={() => setShowExportMenu(!showExportMenu)}
+                  >
+                    📤 Export
+                  </button>
+                  {showExportMenu && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: '100%',
+                        marginTop: '4px',
+                        backgroundColor: 'var(--bg-primary)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '6px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        zIndex: 100,
+                        minWidth: '200px',
+                      }}
+                    >
+                      <button
+                        onClick={handleExportPostman}
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          textAlign: 'left',
+                          border: 'none',
+                          background: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <span>📮</span>
+                        <span>Postman Collection</span>
+                      </button>
+                      <button
+                        onClick={handleExportInsomnia}
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          textAlign: 'left',
+                          border: 'none',
+                          background: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <span>🛌</span>
+                        <span>Insomnia Collection</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <button className="btn btn-secondary" onClick={() => setEditMode(true)}>
+                  Edit
+                </button>
+              </div>
             </div>
 
             {api.description && (

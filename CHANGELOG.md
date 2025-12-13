@@ -5,6 +5,134 @@ All notable changes to Mock API Studio will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Phase 18] - 2024-12-13
+
+### Added - Integrations & Developer Experience
+
+#### Postman Collection Export
+- **PostmanExportService**: Generate Postman Collection v2.1 format
+- **API Endpoint**: `GET /admin/api-definitions/:apiId/export/postman`
+- **Features**:
+  - Includes all endpoints with example requests/responses
+  - Environment variables for base URL and API slug
+  - Path parameters converted to Postman variables
+  - Request bodies from JSON schemas
+  - Multiple response examples
+- **Frontend**: Export dropdown in API detail page with "Postman Collection" option
+- **Tests**: Unit tests for collection generation
+
+#### Insomnia Collection Export
+- **InsomniaExportService**: Generate Insomnia v4 format
+- **API Endpoint**: `GET /admin/api-definitions/:apiId/export/insomnia`
+- **Features**:
+  - Complete workspace and environment setup
+  - All endpoints with request configurations
+  - Path parameters using Insomnia variable syntax
+  - Request bodies for POST/PUT/PATCH methods
+- **Frontend**: "Insomnia Collection" option in export dropdown
+- **Tests**: Unit tests for Insomnia export
+
+#### OAuth2/OIDC Login
+- **GitHub OAuth**:
+  - `GithubStrategy`: Passport strategy for GitHub authentication
+  - Endpoints: `GET /auth/github`, `GET /auth/github/callback`
+  - Scope: `user:email`
+- **Google OAuth**:
+  - `GoogleStrategy`: Passport strategy for Google authentication
+  - Endpoints: `GET /auth/google`, `GET /auth/google/callback`
+  - Scopes: `email`, `profile`
+- **OAuthService**: Handle OAuth login flow and user creation/linking
+- **Frontend**:
+  - "Sign in with GitHub" and "Sign in with Google" buttons on login page
+  - OAuth callback page for token handling
+  - Automatic redirect after successful authentication
+- **Environment Variables**:
+  - `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GITHUB_CALLBACK_URL`
+  - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL`
+  - `FRONTEND_URL` for OAuth redirects
+
+#### Slack Notifications
+- **Data Model**: New `SlackIntegration` model per workspace
+- **SlackService**: Send notifications to Slack webhooks
+- **Event Types**:
+  - `api.created` - New API created
+  - `api.deleted` - API deleted
+  - `rate_limit.exceeded` - Rate limit hit
+  - `high_traffic` - Traffic spike detected
+  - `webhook.failed` - Webhook delivery failed
+  - `endpoint.errors` - Endpoint errors detected
+- **API Endpoints**:
+  - `GET /integrations/slack/workspace/:workspaceId` - Get integration
+  - `POST /integrations/slack/workspace/:workspaceId` - Create/update integration
+  - `DELETE /integrations/slack/workspace/:workspaceId` - Delete integration
+- **Frontend**: 
+  - `SlackIntegrationPage` with webhook URL configuration
+  - Event selector with descriptions
+  - Active/inactive toggle
+  - Integration status display
+- **Features**:
+  - Rich Slack message formatting with blocks
+  - Event filtering per workspace
+  - Temporary disable without deleting configuration
+
+#### GitHub Actions Integration
+- **Documentation**: Complete `GITHUB_ACTIONS_INTEGRATION.md` guide
+- **Workflow Examples**:
+  - Basic API sync on OpenAPI spec changes
+  - Import OpenAPI with validation
+  - Daily API backups with git commits
+  - Environment-specific deployments (dev/staging/prod)
+  - OpenAPI validation on pull requests
+  - Integration tests with mock APIs
+- **Features**:
+  - Preview mode for validation without applying changes
+  - Slack notifications on success/failure
+  - Multi-environment support
+  - Automated backups and version control
+- **API Reference**: All available endpoints documented
+
+### Backend
+- **Dependencies**:
+  - `passport-github2` - GitHub OAuth strategy
+  - `passport-google-oauth20` - Google OAuth strategy
+- **Modules**:
+  - `IntegrationsModule` with `SlackService` and `SlackIntegrationsController`
+  - Updated `AuthModule` with OAuth strategies and controllers
+- **Migrations**: Added `SlackIntegration` model
+- **Tests**: 
+  - `PostmanExportService` unit tests
+  - `InsomniaExportService` unit tests
+
+### Frontend
+- **New Pages**:
+  - `AuthCallbackPage.tsx` - Handle OAuth callbacks
+  - `SlackIntegrationPage.tsx` - Configure Slack notifications
+- **Updated Pages**:
+  - `LoginPage.tsx` - Added OAuth login buttons with GitHub and Google
+  - `ApiDetailPage.tsx` - Added export dropdown for Postman and Insomnia
+- **API Client**: Added `exportPostman()` and `exportInsomnia()` methods
+- **Router**: Added routes for `/auth/callback` and `/integrations/slack`
+
+### Documentation
+- **GitHub Actions Guide**: Comprehensive guide with 10+ workflow examples
+- **OAuth Setup**: Configuration instructions for GitHub and Google apps
+- **Slack Integration**: Webhook setup and event configuration guide
+- **API Reference**: Export endpoints documented
+
+### Changed
+- **ApiDefinitionsModule**: Added `PostmanExportService` and `InsomniaExportService`
+- **AppModule**: Added `IntegrationsModule`
+- **Workspace Model**: Added `slackIntegration` relation
+
+### Developer Experience
+- **Collection Exports**: One-click export for testing tools
+- **Social Login**: Faster onboarding with OAuth providers
+- **Real-time Notifications**: Stay informed with Slack alerts
+- **CI/CD Automation**: Seamless integration with GitHub Actions
+- **Multi-environment**: Deploy to dev, staging, and prod easily
+
+---
+
 ## [Phase 17] - 2024-12-13
 
 ### Added - Security & Governance

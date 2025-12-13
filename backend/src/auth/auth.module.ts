@@ -5,8 +5,12 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TwoFactorController } from './controllers/two-factor.controller';
+import { OAuthController } from './controllers/oauth.controller';
 import { TwoFactorService } from './services/two-factor.service';
+import { OAuthService } from './services/oauth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { GithubStrategy } from './strategies/github.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 import { ConfigModule } from '../config/config.module';
 import { ConfigService } from '../config/config.service';
 
@@ -22,9 +26,20 @@ import { ConfigService } from '../config/config.service';
       }),
     }),
   ],
-  providers: [AuthService, TwoFactorService, JwtStrategy],
-  controllers: [AuthController, TwoFactorController],
-  exports: [AuthService, TwoFactorService, JwtStrategy, PassportModule],
+  providers: [
+    AuthService,
+    TwoFactorService,
+    OAuthService,
+    JwtStrategy,
+    GithubStrategy,
+    GoogleStrategy,
+  ],
+  controllers: [
+    AuthController,
+    TwoFactorController,
+    OAuthController,
+  ],
+  exports: [AuthService, TwoFactorService, OAuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
 

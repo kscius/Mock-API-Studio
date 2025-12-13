@@ -12,6 +12,7 @@ import { ApiDetailPage } from './pages/ApiDetailPage';
 import { EndpointEditorPage } from './pages/EndpointEditorPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { WorkspacesPage } from './pages/WorkspacesPage';
@@ -22,6 +23,7 @@ import { OpenApiImportPage } from './pages/OpenApiImportPage';
 import { WebhooksPage } from './pages/WebhooksPage';
 import { GraphQLTesterPage } from './pages/GraphQLTesterPage';
 import { AuditLogsPage } from './pages/AuditLogsPage';
+import { SlackIntegrationPage } from './pages/SlackIntegrationPage';
 import './App.css';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -109,6 +111,7 @@ function AppRoutes() {
       {/* Rutas públicas */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
       {/* Rutas protegidas */}
       <Route
@@ -207,6 +210,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <AuditLogsPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/integrations/slack"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <SlackIntegrationPage />
             </AppLayout>
           </ProtectedRoute>
         }
