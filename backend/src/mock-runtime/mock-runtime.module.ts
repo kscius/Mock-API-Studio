@@ -3,11 +3,12 @@ import { Module, forwardRef } from '@nestjs/common';
 import { MockRuntimeController } from './mock-runtime.controller';
 import { MockRuntimeService } from './mock-runtime.service';
 import { WebhooksModule } from '../webhooks/webhooks.module';
+import { FakerTemplatingService } from '../shared/faker-templating.service';
 
 @Module({
   imports: [forwardRef(() => WebhooksModule)],
   controllers: [MockRuntimeController],
-  providers: [MockRuntimeService],
+  providers: [MockRuntimeService, FakerTemplatingService],
 })
 export class MockRuntimeModule {}
 

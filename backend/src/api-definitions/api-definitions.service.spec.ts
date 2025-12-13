@@ -22,6 +22,7 @@ describe('ApiDefinitionsService', () => {
       delete: jest.fn(),
       createMany: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
     },
   };
 
@@ -124,6 +125,115 @@ describe('ApiDefinitionsService', () => {
 
       expect(result).toEqual(mockEndpoint);
       expect(prismaService.apiEndpoint.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('duplicateEndpoint', () => {
+    it('should duplicate an endpoint with auto-generated path', async () => {
+      const originalEndpoint = {
+        id: 'ep-1',
+        apiId: 'api-1',
+        method: 'GET',
+        path: '/users',
+        summary: 'Get users',
+        requestSchema: null,
+        responses: [{ status: 200, body: { users: [] }, isDefault: true }],
+        delayMs: 0,
+        enabled: true,
+        type: 'REST',
+        operationName: null,
+        operationType: null,
+        api: { id: 'api-1', slug: 'test-api', workspaceId: 'ws-1' },
+      };
+
+      const duplicatedEndpoint = {
+        id: 'ep-2',
+        apiId: 'api-1',
+        method: 'GET',
+        path: '/users-copy',
+        summary: 'Get users (Copy)',
+        requestSchema: null,
+        responses: [{ status: 200, body: { users: [] }, isDefault: true }],
+        delayMs: 0,
+        enabled: true,
+        type: 'REST',
+        operationName: null,
+        operationType: null,
+      };
+
+      mockPrismaService.apiEndpoint.findUnique.mockResolvedValue(originalEndpoint);
+      mockPrismaService.apiEndpoint.findFirst.mockResolvedValue(null); // No existing path
+      mockPrismaService.apiEndpoint.create.mockResolvedValue(duplicatedEndpoint);
+
+      const result = await service.duplicateEndpoint('ep-1');
+
+      expect(result).toEqual(duplicatedEndpoint);
+      expect(prismaService.apiEndpoint.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          apiId: 'api-1',
+          method: 'GET',
+          path: '/users-copy',
+          summary: 'Get users (Copy)',
+        }),
+      });
+      expect(redisService.del).toHaveBeenCalledWith('mock:api:ws-1:test-api');
+    });
+
+    it('should duplicate an endpoint with custom path', async () => {
+      const originalEndpoint = {
+        id: 'ep-1',
+        apiId: 'api-1',
+        method: 'GET',
+        path: '/users',
+        summary: 'Get users',
+        requestSchema: null,
+        responses: [{ status: 200, body: { users: [] }, isDefault: true }],
+        delayMs: 0,
+        enabled: true,
+        type: 'REST',
+        operationName: null,
+        operationType: null,
+        api: { id: 'api-1', slug: 'test-api', workspaceId: 'ws-1' },
+      };
+
+      const duplicatedEndpoint = {
+        id: 'ep-2',
+        apiId: 'api-1',
+        method: 'POST',
+        path: '/users/v2',
+        summary: 'Create users v2',
+        requestSchema: null,
+        responses: [{ status: 200, body: { users: [] }, isDefault: true }],
+        delayMs: 0,
+        enabled: true,
+        type: 'REST',
+        operationName: null,
+        operationType: null,
+      };
+
+      mockPrismaService.apiEndpoint.findUnique.mockResolvedValue(originalEndpoint);
+      mockPrismaService.apiEndpoint.create.mockResolvedValue(duplicatedEndpoint);
+
+      const result = await service.duplicateEndpoint('ep-1', {
+        path: '/users/v2',
+        method: 'POST',
+        summary: 'Create users v2',
+      });
+
+      expect(result).toEqual(duplicatedEndpoint);
+      expect(prismaService.apiEndpoint.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          path: '/users/v2',
+          method: 'POST',
+          summary: 'Create users v2',
+        }),
+      });
+    });
+
+    it('should throw error if endpoint not found', async () => {
+      mockPrismaService.apiEndpoint.findUnique.mockResolvedValue(null);
+
+      await expect(service.duplicateEndpoint('invalid-id')).rejects.toThrow('Endpoint not found');
     });
   });
 });
