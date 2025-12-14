@@ -17,6 +17,7 @@ import { GraphQLRuntimeModule } from './graphql-runtime/graphql-runtime.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { WebSocketMocksModule } from './websocket-mocks/websocket-mocks.module';
+import { UsersModule } from './users/users.module';
 import { AuditLogInterceptor } from './audit-logs/interceptors/audit-log.interceptor';
 
 @Module({
@@ -40,6 +41,7 @@ import { AuditLogInterceptor } from './audit-logs/interceptors/audit-log.interce
     AuditLogsModule,
     IntegrationsModule,
     WebSocketMocksModule,
+    UsersModule,
   ],
   controllers: [],
   providers: [

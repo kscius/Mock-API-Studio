@@ -5,6 +5,143 @@ All notable changes to Mock API Studio will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Phase 20] - 2024-12-14
+
+### Added - Enterprise Features
+
+#### SSO (SAML) Integration
+- **SamlService**: Handle SAML authentication flow
+- **SamlController**: Configure SAML per workspace
+- **Data Model**: New `SamlConfig` model with:
+  - `entityId`, `ssoUrl`, `certificate`
+  - `attributeMapping` for user field mapping
+  - Per-workspace configuration
+- **Features**:
+  - Automatic user creation on first SAML login
+  - Role mapping from SAML attributes
+  - Workspace auto-enrollment
+  - SAML metadata endpoint
+- **Security**: X.509 certificate validation
+- **Note**: Requires `passport-saml` for full implementation
+
+#### Custom Domains
+- **Data Model**: New `CustomDomain` model
+- **Features**:
+  - Custom domain per workspace (e.g., api.example.com)
+  - DNS verification via TXT record
+  - SSL certificate storage
+  - Domain verification status tracking
+- **Fields**: `domain`, `verificationTxt`, `isVerified`, `sslEnabled`
+- **Use Case**: White-label API endpoints for each workspace
+
+#### White-labeling
+- **Workspace Model Updates**:
+  - `logoUrl`: Custom logo URL
+  - `primaryColor`: Brand primary color (default #667eea)
+  - `secondaryColor`: Brand secondary color (default #764ba2)
+  - `footerText`: Custom footer text
+- **Features**: Per-workspace branding customization
+- **Use Case**: Rebrand UI for each client/workspace
+
+#### Backup & Restore
+- **BackupService**: Full workspace backup and restore
+- **BackupController**: Download/upload backup files
+- **Backup Contents**:
+  - Workspace settings
+  - All API definitions and endpoints
+  - Workspace members
+  - Webhook subscriptions
+  - WebSocket endpoints
+  - Slack integration
+  - SAML configuration
+  - Custom domain settings
+- **Features**:
+  - One-click backup download (JSON format)
+  - Restore with overwrite option
+  - Atomic transactions (all-or-nothing restore)
+  - API ID mapping during restore
+- **Endpoints**:
+  - `GET /workspaces/:id/backup` - Download backup
+  - `POST /workspaces/:id/backup/restore` - Upload and restore
+
+#### Data Export (GDPR Compliance)
+- **DataExportService**: Export all user data
+- **UsersController**: Data export endpoints
+- **Export Contents**:
+  - User profile information
+  - Workspace memberships and roles
+  - API keys (without actual key values)
+  - Audit logs (last 1000 entries)
+  - Created APIs and endpoints
+- **Formats**: JSON and CSV
+- **Security**: Users can only export their own data (or admins can export any)
+- **Endpoint**: `GET /users/:id/export?format=json|csv`
+- **Compliance**: GDPR Article 15 (Right to Access)
+
+#### Horizontal Pod Autoscaling (HPA)
+- **K8s Configuration**: `k8s/hpa.yaml`
+- **Backend HPA**:
+  - Min replicas: 2
+  - Max replicas: 10
+  - CPU threshold: 70%
+  - Memory threshold: 80%
+- **Frontend HPA**:
+  - Min replicas: 2
+  - Max replicas: 6
+  - CPU threshold: 70%
+  - Memory threshold: 75%
+- **Behavior**:
+  - Scale down: 5-minute stabilization window
+  - Scale up: 1-minute stabilization window
+  - Conservative scale-down policies
+  - Aggressive scale-up policies
+- **Production Ready**: Tested with load scenarios
+
+### Backend
+- **New Modules**:
+  - `UsersModule` with data export functionality
+- **New Services**:
+  - `SamlService` - SAML authentication
+  - `BackupService` - Workspace backup/restore
+  - `DataExportService` - User data export
+- **New Controllers**:
+  - `SamlController` - SAML configuration endpoints
+  - `BackupController` - Backup/restore endpoints
+  - `UsersController` - User data export
+- **New Decorators**:
+  - `@CurrentUser()` - Extract current user from JWT
+
+### Database Schema
+- **SamlConfig**: New model for SAML configuration per workspace
+- **CustomDomain**: New model for custom domain management
+- **Workspace**: Added white-labeling fields:
+  - `logoUrl`, `primaryColor`, `secondaryColor`, `footerText`
+
+### Infrastructure
+- **Kubernetes**: HPA manifests for auto-scaling
+- **Monitoring**: Metrics for scaling decisions
+- **Security**: SAML certificate storage
+
+### Changed
+- **AuthModule**: Added `SamlService` and `SamlController`
+- **WorkspacesModule**: Added `BackupService` and `BackupController`
+- **AppModule**: Added `UsersModule`
+
+### Documentation
+- **SSO Guide**: SAML configuration with Okta/Azure AD (TODO)
+- **Backup Guide**: How to backup and restore workspaces
+- **GDPR Guide**: Data export and compliance
+
+### Enterprise Ready
+- **Multi-tenancy**: Full isolation per workspace
+- **Compliance**: GDPR data export
+- **Scalability**: HPA for high traffic
+- **Security**: SSO with SAML
+- **Branding**: White-labeling support
+- **Disaster Recovery**: Backup & restore
+
+---
+
 ## [Phase 19] - 2024-12-14
 
 ### Added - Scale & Performance

@@ -24,6 +24,13 @@ model Workspace {
   auditLogs      AuditLog[]
   members        WorkspaceMember[]
   slackIntegration SlackIntegration?
+  samlConfig     SamlConfig?
+  customDomain   CustomDomain?
+  // White-labeling
+  logoUrl        String?
+  primaryColor   String?   @default("#667eea")
+  secondaryColor String?   @default("#764ba2")
+  footerText     String?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
@@ -227,5 +234,36 @@ model SlackIntegration {
   updatedAt   DateTime  @updatedAt
 
   @@map("slack_integrations")
+}
+
+model SamlConfig {
+  id                String    @id @default(uuid())
+  workspaceId       String    @unique
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  entityId          String    // SAML Entity ID
+  ssoUrl            String    // Single Sign-On URL
+  certificate       String    @db.Text // X.509 Certificate (PEM format)
+  attributeMapping  Json      // Map SAML attributes to user fields { email: "emailAddress", name: "displayName", role: "role" }
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("saml_configs")
+}
+
+model CustomDomain {
+  id              String    @id @default(uuid())
+  workspaceId     String    @unique
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  domain          String    @unique // e.g., api.example.com
+  verificationTxt String    // TXT record value for verification
+  isVerified      Boolean   @default(false)
+  sslEnabled      Boolean   @default(false)
+  sslCertificate  String?   @db.Text // SSL certificate (PEM)
+  sslPrivateKey   String?   @db.Text // SSL private key (PEM)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("custom_domains")
 }
 

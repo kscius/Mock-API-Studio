@@ -6,8 +6,10 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TwoFactorController } from './controllers/two-factor.controller';
 import { OAuthController } from './controllers/oauth.controller';
+import { SamlController } from './controllers/saml.controller';
 import { TwoFactorService } from './services/two-factor.service';
 import { OAuthService } from './services/oauth.service';
+import { SamlService } from './services/saml.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
@@ -30,6 +32,7 @@ import { ConfigService } from '../config/config.service';
     AuthService,
     TwoFactorService,
     OAuthService,
+    SamlService,
     JwtStrategy,
     GithubStrategy,
     GoogleStrategy,
@@ -38,8 +41,9 @@ import { ConfigService } from '../config/config.service';
     AuthController,
     TwoFactorController,
     OAuthController,
+    SamlController,
   ],
-  exports: [AuthService, TwoFactorService, OAuthService, JwtStrategy, PassportModule],
+  exports: [AuthService, TwoFactorService, OAuthService, SamlService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
 

@@ -52,8 +52,16 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
 - **📈 Prometheus Metrics**: HTTP, webhook, cache, and runtime metrics for monitoring
 - **⚙️ Configurable**: Cache TTL, rate limits, webhook retries, analytics retention via env vars
 - **🔄 CI/CD Pipeline**: GitHub Actions workflow with automated testing and Docker builds
-- **☸️ Kubernetes Ready**: Production-grade K8s manifests with health probes and auto-scaling
+- **☸️ Kubernetes Ready**: Production-grade K8s manifests with health probes and HPA auto-scaling
 - **🛠️ CLI Tool**: Powerful command-line interface for managing APIs, workspaces, and imports
+
+### Enterprise Features 💼
+- **🔐 SSO (SAML)**: Single Sign-On with Okta, Azure AD, and other SAML providers
+- **🌐 Custom Domains**: Configure custom domains per workspace with SSL support
+- **🎨 White-labeling**: Custom logos, brand colors, and footer text per workspace
+- **💾 Backup & Restore**: Full workspace backup with one-click restore functionality
+- **📦 Data Export**: GDPR-compliant user data export in JSON and CSV formats
+- **📊 Horizontal Pod Autoscaling**: Automatic scaling based on CPU/memory metrics
 
 ## 📋 Tech Stack
 
