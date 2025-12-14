@@ -9,6 +9,8 @@ import { renderWithTemplate } from '../shared/utils/template-engine';
 import { responseMatches } from '../shared/utils/response-matcher';
 import { WebhooksService } from '../webhooks/webhooks.service';
 import { FakerTemplatingService } from '../shared/faker-templating.service';
+import { ProxyService } from './services/proxy.service';
+import { DeduplicationService } from './services/deduplication.service';
 
 interface ResponseMatchRule {
   query?: Record<string, string | number | boolean>;
@@ -42,6 +44,8 @@ export class MockRuntimeService {
     private readonly config: ConfigService,
     private readonly validation: ValidationService,
     private readonly fakerTemplating: FakerTemplatingService,
+    private readonly proxyService: ProxyService,
+    private readonly deduplicationService: DeduplicationService,
     @Inject(forwardRef(() => WebhooksService))
     private readonly webhooks: WebhooksService,
   ) {}
@@ -71,6 +75,63 @@ export class MockRuntimeService {
 
     if (!matchedEndpoint) {
       throw new NotFoundException('Endpoint not found');
+    }
+
+    // CHECK DEDUPLICATION (before validation)
+    if (matchedEndpoint.deduplication) {
+      const cached = await this.deduplicationService.checkDuplicate(
+        matchedEndpoint.id,
+        {
+          method: req.method,
+          path: req.path,
+          body: req.body,
+          query: req.query,
+        },
+      );
+
+      if (cached) {
+        // Return cached response with deduplication header
+        return {
+          statusCode: cached.status,
+          headers: {
+            ...cached.headers,
+            'X-Mock-Deduplicated': 'true',
+          },
+          body: cached.body,
+        };
+      }
+    }
+
+    // PROXY MODE (forward to real API)
+    if (matchedEndpoint.proxyMode && matchedEndpoint.proxyTarget) {
+      try {
+        const proxyResponse = await this.proxyService.forwardRequest(
+          matchedEndpoint,
+          {
+            method: req.method,
+            path: req.path,
+            headers: req.headers,
+            body: req.body,
+            query: req.query,
+          },
+        );
+
+        // Log analytics with proxied flag
+        setImmediate(() => {
+          this.logAnalytics(req, matchedEndpoint, proxyResponse.status, 0, true);
+        });
+
+        return {
+          statusCode: proxyResponse.status,
+          headers: {
+            ...proxyResponse.headers,
+            'X-Mock-Proxied': 'true',
+          },
+          body: proxyResponse.body,
+        };
+      } catch (error: any) {
+        throw new BadRequestException(`Proxy failed: ${error.message}`);
+      }
     }
 
     // VALIDACIÓN con JSON Schema
@@ -137,11 +198,43 @@ export class MockRuntimeService {
       });
     }
 
+    // Build response headers
+    const responseHeaders = response.headers ?? { 'Content-Type': 'application/json' };
+
+    // Add caching headers if enabled
+    if (matchedEndpoint.cacheEnabled) {
+      responseHeaders['Cache-Control'] = `${matchedEndpoint.cacheControl || 'public'}, max-age=${matchedEndpoint.cacheTTL || 3600}`;
+      
+      // Generate ETag (simple hash of body)
+      const etag = this.generateETag(renderedBody);
+      responseHeaders['ETag'] = etag;
+    }
+
     const result = {
       statusCode: response.status,
-      headers: response.headers ?? { 'Content-Type': 'application/json' },
+      headers: responseHeaders,
       body: renderedBody,
     };
+
+    // Cache response for deduplication (if enabled)
+    if (matchedEndpoint.deduplication) {
+      setImmediate(() => {
+        this.deduplicationService.cacheResponse(
+          matchedEndpoint.id,
+          {
+            method: req.method,
+            path: req.path,
+            body: req.body,
+            query: req.query,
+          },
+          {
+            status: result.statusCode,
+            headers: result.headers,
+            body: result.body,
+          },
+        );
+      });
+    }
 
     // Fire webhooks asynchronously (don't block response)
     setImmediate(() => {
@@ -214,6 +307,48 @@ export class MockRuntimeService {
 
     await this.redis.set(cacheKey, JSON.stringify(api), this.config.cacheTtlSeconds);
     return api;
+  }
+
+  private async logAnalytics(
+    req: RuntimeRequest,
+    endpoint: any,
+    statusCode: number,
+    durationMs: number,
+    proxied: boolean = false,
+    deduplicated: boolean = false,
+    responseBody?: any,
+  ): Promise<void> {
+    try {
+      // Calculate request and response sizes
+      const requestSize = req.body ? JSON.stringify(req.body).length : 0;
+      const responseSize = responseBody ? JSON.stringify(responseBody).length : 0;
+
+      await this.prisma.mockRequest.create({
+        data: {
+          workspaceId: req.workspaceId,
+          apiSlug: req.apiSlug,
+          endpointId: endpoint.id,
+          method: req.method,
+          path: req.path,
+          statusCode,
+          durationMs,
+          proxied,
+          deduplicated,
+          requestSize,
+          responseSize,
+          // Note: geo-location will be added in controller via IP
+        },
+      });
+    } catch (error) {
+      // Silently fail analytics logging
+      console.error('Failed to log analytics:', error);
+    }
+  }
+
+  private generateETag(body: any): string {
+    const crypto = require('crypto');
+    const content = typeof body === 'string' ? body : JSON.stringify(body);
+    return `"${crypto.createHash('md5').update(content).digest('hex')}"`;
   }
 
 }

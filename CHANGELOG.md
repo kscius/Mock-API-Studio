@@ -5,6 +5,103 @@ All notable changes to Mock API Studio will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Phase 19] - 2024-12-14
+
+### Added - Scale & Performance
+
+#### Proxy Mode
+- **ProxyService**: Forward requests to real APIs instead of returning mocked responses
+- **Features**:
+  - Configurable target URL per endpoint
+  - Custom headers transformation (add, remove, override)
+  - Configurable timeout (default 5000ms)
+  - Automatic request/response logging
+  - `X-Mock-Proxied: true` header on proxied responses
+- **Data Model**: Added `proxyMode`, `proxyTarget`, `proxyHeaders`, `proxyTimeout` to `ApiEndpoint`
+- **Frontend**: Proxy Mode toggle in endpoint editor with target URL and timeout configuration
+
+#### Request Deduplication
+- **DeduplicationService**: Cache identical requests to reduce processing
+- **Features**:
+  - SHA-256 hash generation from method + path + query + body
+  - 60-second TTL for cached responses
+  - Redis-based storage
+  - `X-Mock-Deduplicated: true` header on cached responses
+  - Opt-in per endpoint
+- **Data Model**: Added `deduplication` boolean to `ApiEndpoint` and `deduplicated` flag to `MockRequest`
+- **Frontend**: "Request Deduplication" checkbox in endpoint editor
+
+#### CDN Integration (Response Caching)
+- **Features**:
+  - `Cache-Control` header with configurable TTL and public/private setting
+  - ETag generation (MD5 hash of response body)
+  - Configurable per endpoint
+- **Data Model**: Added `cacheEnabled`, `cacheTTL`, `cacheControl` to `ApiEndpoint`
+- **Frontend**: CDN/Browser Caching toggle with TTL and cache control settings
+
+#### WebSocket Mocking
+- **WebSocketMocksGateway**: Socket.IO-based WebSocket server
+- **WebSocketMocksController**: CRUD operations for WebSocket endpoints
+- **Features**:
+  - Dynamic namespace matching (`/ws/*`)
+  - Event streaming on connection or interval
+  - Event configuration: `{ name, payload, trigger: 'connection' | 'interval', interval?: number }`
+  - Automatic cleanup on disconnect
+- **Data Model**: New `WebSocketEndpoint` model with `apiId`, `path`, `events`
+- **Namespace**: `@nestjs/websockets` integration with Socket.IO
+
+#### Advanced Analytics
+- **GeoLocationService**: IP-based geo-location using ip-api.com
+- **Features**:
+  - Country and city tracking
+  - IP caching with 1-hour TTL
+  - Local/private IP detection
+  - Request and response size calculation (bytes)
+- **Data Model**: Added `requestSize`, `responseSize`, `geoCountry`, `geoCity`, `proxied` to `MockRequest`
+- **Analytics**: Size and geo-location data logged for all mock requests
+
+### Backend
+- **New Services**:
+  - `ProxyService` - Forward requests to real APIs
+  - `DeduplicationService` - Cache duplicate requests
+  - `GeoLocationService` - IP geo-location lookup
+- **New Modules**:
+  - `WebSocketMocksModule` with gateway and controller
+- **Updated Services**:
+  - `MockRuntimeService` - Integrated proxy, deduplication, and caching
+- **Dependencies**: Requires `@nestjs/websockets`, `socket.io`, `@nestjs/platform-socket.io`
+
+### Frontend
+- **EndpointEditorPage**: New "Performance & Caching" section with:
+  - Proxy Mode toggle and configuration
+  - Request Deduplication toggle
+  - CDN/Browser Caching toggle with TTL and cache control
+- **Type Updates**: Added Phase 19 fields to `ApiEndpoint` type
+
+### Database Schema
+- **ApiEndpoint**: 
+  - Added `proxyMode`, `proxyTarget`, `proxyHeaders`, `proxyTimeout`
+  - Added `deduplication`, `cacheEnabled`, `cacheTTL`, `cacheControl`
+- **MockRequest**:
+  - Added `requestSize`, `responseSize`, `geoCountry`, `geoCity`
+  - Added `deduplicated`, `proxied` flags
+  - Added index on `geoCountry`
+- **WebSocketEndpoint**: New model for WebSocket endpoint definitions
+
+### Performance
+- **Request Deduplication**: Up to 60 seconds response time reduction for duplicate requests
+- **Proxy Mode**: Hybrid mock/real API testing without changing client code
+- **CDN Caching**: Offload traffic to CDN/browser cache with proper headers
+- **WebSocket**: Real-time communication support without separate WebSocket server
+
+### Changed
+- **MockRuntimeModule**: Added `ProxyService` and `DeduplicationService` providers
+- **AnalyticsModule**: Added `GeoLocationService` provider
+- **AppModule**: Added `WebSocketMocksModule`
+- **MockRuntimeService**: Enhanced with proxy, deduplication, and caching logic
+
+---
+
 ## [Phase 18] - 2024-12-13
 
 ### Added - Integrations & Developer Experience

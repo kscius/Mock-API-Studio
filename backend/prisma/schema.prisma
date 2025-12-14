@@ -57,6 +57,7 @@ model ApiDefinition {
   isLatest    Boolean       @default(true)
   tags        String[]
   endpoints   ApiEndpoint[]
+  websocketEndpoints WebSocketEndpoint[]
   // Versioning
   parentId    String?       // Reference to previous version
   parent      ApiDefinition? @relation("ApiVersions", fields: [parentId], references: [id], onDelete: SetNull)
@@ -83,6 +84,17 @@ model ApiEndpoint {
   type            String        @default("REST") // REST | GRAPHQL
   operationName   String?       // for GraphQL
   operationType   String?       // query | mutation | subscription
+  // Proxy Mode
+  proxyMode       Boolean       @default(false)
+  proxyTarget     String?       // Target URL to forward to
+  proxyHeaders    Json?         // Headers to add/remove/transform
+  proxyTimeout    Int           @default(5000) // Timeout in milliseconds
+  // Request Deduplication
+  deduplication   Boolean       @default(false)
+  // Caching
+  cacheEnabled    Boolean       @default(false)
+  cacheTTL        Int           @default(3600) // seconds
+  cacheControl    String        @default("public") // public | private
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -127,22 +139,30 @@ model ApiKey {
 }
 
 model MockRequest {
-  id           String   @id @default(uuid())
-  workspaceId  String?
-  apiSlug      String
-  endpointId   String?
-  method       String
-  path         String
-  statusCode   Int
-  durationMs   Int
-  userAgent    String?
-  ip           String?
-  error        String?
-  createdAt    DateTime @default(now())
+  id            String   @id @default(uuid())
+  workspaceId   String?
+  apiSlug       String
+  endpointId    String?
+  method        String
+  path          String
+  statusCode    Int
+  durationMs    Int
+  userAgent     String?
+  ip            String?
+  error         String?
+  // Advanced Analytics
+  requestSize   Int?      // Bytes
+  responseSize  Int?      // Bytes
+  geoCountry    String?
+  geoCity       String?
+  deduplicated  Boolean   @default(false) // Was this request deduplicated?
+  proxied       Boolean   @default(false) // Was this request proxied?
+  createdAt     DateTime @default(now())
 
   @@index([workspaceId, apiSlug, createdAt])
   @@index([apiSlug, createdAt])
   @@index([createdAt])
+  @@index([geoCountry])
   @@map("mock_requests")
 }
 
@@ -159,6 +179,19 @@ model WebhookSubscription {
 
   @@index([workspaceId, isActive])
   @@map("webhook_subscriptions")
+}
+
+model WebSocketEndpoint {
+  id          String        @id @default(uuid())
+  apiId       String
+  api         ApiDefinition @relation(fields: [apiId], references: [id], onDelete: Cascade)
+  path        String        // e.g., /ws/notifications
+  events      Json          // Array of event definitions { name, payload, interval? }
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([apiId, path])
+  @@map("websocket_endpoints")
 }
 
 model AuditLog {

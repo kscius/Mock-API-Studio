@@ -33,8 +33,14 @@ A complete enterprise-grade solution for designing, managing, and serving mock A
 - **🪝 Webhooks**: Fire HTTP notifications with retry logic and exponential backoff
 - **🔷 GraphQL Support**: Mock GraphQL queries and mutations
 - **📊 Analytics**: Request tracking, metrics, performance stats, and automated retention cleanup
+- **🌐 Advanced Analytics**: Request/response size tracking and geo-location by country/city
 - **🔒 Security**: Helmet, rate limiting (per-workspace), CORS protection
 - **⚡ Conditional Responses**: Match responses based on query params, headers, or body
+- **🚀 Performance Optimization**:
+  - **Proxy Mode**: Forward requests to real APIs for hybrid testing
+  - **Request Deduplication**: Cache identical requests for 60 seconds
+  - **CDN Integration**: Cache-Control and ETag headers for browser/CDN caching
+- **🔌 WebSocket Mocking**: Mock real-time WebSocket endpoints with event streaming
 - **🧪 Comprehensive Testing**: 80%+ test coverage with Jest, Vitest, and Playwright
 - **📝 Audit Logs**: Track all changes with user, IP, and timestamp
 

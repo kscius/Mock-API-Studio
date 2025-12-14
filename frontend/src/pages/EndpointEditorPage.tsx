@@ -34,6 +34,15 @@ export function EndpointEditorPage() {
   const [responses, setResponses] = useState<MockResponse[]>([
     { status: 200, headers: {}, body: {}, isDefault: true },
   ]);
+  
+  // Phase 19 fields
+  const [proxyMode, setProxyMode] = useState(false);
+  const [proxyTarget, setProxyTarget] = useState('');
+  const [proxyTimeout, setProxyTimeout] = useState(5000);
+  const [deduplication, setDeduplication] = useState(false);
+  const [cacheEnabled, setCacheEnabled] = useState(false);
+  const [cacheTTL, setCacheTTL] = useState(3600);
+  const [cacheControl, setCacheControl] = useState('public');
 
   useEffect(() => {
     loadData();
@@ -55,6 +64,15 @@ export function EndpointEditorPage() {
           setDelayMs(ep.delayMs);
           setEnabled(ep.enabled);
           setResponses(ep.responses);
+          
+          // Phase 19 fields
+          setProxyMode(ep.proxyMode || false);
+          setProxyTarget(ep.proxyTarget || '');
+          setProxyTimeout(ep.proxyTimeout || 5000);
+          setDeduplication(ep.deduplication || false);
+          setCacheEnabled(ep.cacheEnabled || false);
+          setCacheTTL(ep.cacheTTL || 3600);
+          setCacheControl(ep.cacheControl || 'public');
         }
       }
     } catch (err) {
@@ -75,6 +93,14 @@ export function EndpointEditorPage() {
       delayMs,
       enabled,
       responses,
+      // Phase 19 fields
+      proxyMode,
+      proxyTarget: proxyMode ? proxyTarget : null,
+      proxyTimeout,
+      deduplication,
+      cacheEnabled,
+      cacheTTL,
+      cacheControl,
     };
 
     try {
@@ -236,6 +262,111 @@ export function EndpointEditorPage() {
                 Enabled
               </label>
             </div>
+          </div>
+
+          {/* Phase 19: Performance & Caching */}
+          <div style={{ marginTop: '32px', padding: '20px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>
+              ⚡ Performance & Caching
+            </h3>
+
+            {/* Proxy Mode */}
+            <div className="form-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input
+                  type="checkbox"
+                  checked={proxyMode}
+                  onChange={(e) => setProxyMode(e.target.checked)}
+                />
+                <span style={{ fontWeight: '600' }}>Proxy Mode</span>
+              </label>
+              <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
+                Forward requests to a real API instead of returning mocked responses
+              </p>
+            </div>
+
+            {proxyMode && (
+              <div style={{ marginLeft: '24px', marginTop: '12px' }}>
+                <div className="form-group">
+                  <label className="label">Proxy Target URL</label>
+                  <input
+                    className="input"
+                    value={proxyTarget}
+                    onChange={(e) => setProxyTarget(e.target.value)}
+                    placeholder="https://api.example.com"
+                    type="url"
+                    required={proxyMode}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="label">Timeout (ms)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    value={proxyTimeout}
+                    onChange={(e) => setProxyTimeout(parseInt(e.target.value) || 5000)}
+                    min="100"
+                    max="30000"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Request Deduplication */}
+            <div className="form-group" style={{ marginTop: '20px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input
+                  type="checkbox"
+                  checked={deduplication}
+                  onChange={(e) => setDeduplication(e.target.checked)}
+                />
+                <span style={{ fontWeight: '600' }}>Request Deduplication</span>
+              </label>
+              <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
+                Cache identical requests for 60 seconds to reduce processing
+              </p>
+            </div>
+
+            {/* Response Caching */}
+            <div className="form-group" style={{ marginTop: '20px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input
+                  type="checkbox"
+                  checked={cacheEnabled}
+                  onChange={(e) => setCacheEnabled(e.target.checked)}
+                />
+                <span style={{ fontWeight: '600' }}>CDN/Browser Caching</span>
+              </label>
+              <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
+                Add Cache-Control and ETag headers for CDN and browser caching
+              </p>
+            </div>
+
+            {cacheEnabled && (
+              <div style={{ marginLeft: '24px', marginTop: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-group">
+                  <label className="label">Cache TTL (seconds)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    value={cacheTTL}
+                    onChange={(e) => setCacheTTL(parseInt(e.target.value) || 3600)}
+                    min="0"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="label">Cache Control</label>
+                  <select
+                    className="select"
+                    value={cacheControl}
+                    onChange={(e) => setCacheControl(e.target.value)}
+                  >
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Template Variables Panel */}
