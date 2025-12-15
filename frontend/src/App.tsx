@@ -24,6 +24,7 @@ import { WebhooksPage } from './pages/WebhooksPage';
 import { GraphQLTesterPage } from './pages/GraphQLTesterPage';
 import { AuditLogsPage } from './pages/AuditLogsPage';
 import { SlackIntegrationPage } from './pages/SlackIntegrationPage';
+import { MockRecordingPage } from './pages/MockRecordingPage';
 import './App.css';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -250,6 +251,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <TwoFactorAuthPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/apis/:apiId/mock-recording"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <MockRecordingPage />
             </AppLayout>
           </ProtectedRoute>
         }
