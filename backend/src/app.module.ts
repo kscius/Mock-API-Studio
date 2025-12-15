@@ -21,6 +21,7 @@ import { UsersModule } from './users/users.module';
 import { MockRecordingModule } from './mock-recording/mock-recording.module';
 import { ContractTestingModule } from './contract-testing/contract-testing.module';
 import { ApiDiffModule } from './api-diff/api-diff.module';
+import { OrganizationsModule } from './organizations/organizations.module';
 import { AuditLogInterceptor } from './audit-logs/interceptors/audit-log.interceptor';
 
 @Module({
@@ -48,6 +49,7 @@ import { AuditLogInterceptor } from './audit-logs/interceptors/audit-log.interce
     MockRecordingModule,
     ContractTestingModule,
     ApiDiffModule,
+    OrganizationsModule,
   ],
   controllers: [],
   providers: [

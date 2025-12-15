@@ -31,6 +31,10 @@ model Workspace {
   primaryColor   String?   @default("#667eea")
   secondaryColor String?   @default("#764ba2")
   footerText     String?
+  // Phase 23: Teams & Organizations
+  organizationId String?
+  organization   Organization? @relation("OrganizationWorkspaces", fields: [organizationId], references: [id])
+  teams          Team[]        @relation("TeamWorkspaces")
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
@@ -122,6 +126,12 @@ model User {
   apiKeys           ApiKey[]
   auditLogs         AuditLog[]
   workspaceMemberships WorkspaceMember[]
+  // Phase 23: Teams & Organizations
+  organizationMemberships OrganizationMember[]
+  teamMemberships   TeamMember[]
+  comments          Comment[]
+  changeRequestsCreated ChangeRequest[] @relation("ChangeRequestCreatedBy")
+  changeRequestApprovals ChangeRequestApproval[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
@@ -265,5 +275,142 @@ model CustomDomain {
   updatedAt       DateTime  @updatedAt
 
   @@map("custom_domains")
+}
+
+// =============================================
+// Phase 23: Teams & Organizations + Collaboration
+// =============================================
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum TeamRole {
+  LEAD
+  MEMBER
+}
+
+enum ChangeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  MERGED
+}
+
+model Organization {
+  id              String              @id @default(uuid())
+  name            String
+  slug            String              @unique
+  description     String?
+  billingEmail    String?
+  workspaces      Workspace[]         @relation("OrganizationWorkspaces")
+  members         OrganizationMember[]
+  teams           Team[]
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String           @id @default(uuid())
+  organizationId String
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           OrganizationRole @default(MEMBER)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([organizationId, userId])
+  @@map("organization_members")
+}
+
+model Team {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  slug           String
+  description    String?
+  members        TeamMember[]
+  workspaces     Workspace[]  @relation("TeamWorkspaces")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([organizationId, slug])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      TeamRole @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model Comment {
+  id          String    @id @default(uuid())
+  entityType  String    // api_endpoint | api_definition | workspace
+  entityId    String
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     String    @db.Text
+  mentions    String[]  // Array of user IDs mentioned with @
+  parentId    String?   // For threaded comments
+  parent      Comment?  @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[] @relation("CommentThread")
+  isResolved  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model ChangeRequest {
+  id          String              @id @default(uuid())
+  workspaceId String
+  apiId       String?
+  endpointId  String?
+  title       String
+  description String              @db.Text
+  changes     Json                // Proposed changes { type: 'create|update|delete', before: {...}, after: {...} }
+  status      ChangeRequestStatus @default(PENDING)
+  createdById String
+  createdBy   User                @relation("ChangeRequestCreatedBy", fields: [createdById], references: [id])
+  approvals   ChangeRequestApproval[]
+  requiredApprovals Int           @default(1) // Minimum approvals needed
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([workspaceId])
+  @@index([status])
+  @@map("change_requests")
+}
+
+model ChangeRequestApproval {
+  id              String        @id @default(uuid())
+  changeRequestId String
+  changeRequest   ChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  approved        Boolean
+  comment         String?       @db.Text
+  createdAt       DateTime      @default(now())
+
+  @@unique([changeRequestId, userId])
+  @@map("change_request_approvals")
 }
 
