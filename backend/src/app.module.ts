@@ -19,6 +19,8 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { WebSocketMocksModule } from './websocket-mocks/websocket-mocks.module';
 import { UsersModule } from './users/users.module';
 import { MockRecordingModule } from './mock-recording/mock-recording.module';
+import { ContractTestingModule } from './contract-testing/contract-testing.module';
+import { ApiDiffModule } from './api-diff/api-diff.module';
 import { AuditLogInterceptor } from './audit-logs/interceptors/audit-log.interceptor';
 
 @Module({
@@ -44,6 +46,8 @@ import { AuditLogInterceptor } from './audit-logs/interceptors/audit-log.interce
     WebSocketMocksModule,
     UsersModule,
     MockRecordingModule,
+    ContractTestingModule,
+    ApiDiffModule,
   ],
   controllers: [],
   providers: [

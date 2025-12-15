@@ -25,6 +25,7 @@ import { GraphQLTesterPage } from './pages/GraphQLTesterPage';
 import { AuditLogsPage } from './pages/AuditLogsPage';
 import { SlackIntegrationPage } from './pages/SlackIntegrationPage';
 import { MockRecordingPage } from './pages/MockRecordingPage';
+import { ApiDiffPage } from './pages/ApiDiffPage';
 import './App.css';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -261,6 +262,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <MockRecordingPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/apis/:apiId/diff"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ApiDiffPage />
             </AppLayout>
           </ProtectedRoute>
         }
