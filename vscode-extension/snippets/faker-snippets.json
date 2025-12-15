@@ -1,0 +1,49 @@
+{
+  "Faker Name": {
+    "prefix": "faker-name",
+    "body": ["{{faker.name.${1|firstName,lastName,fullName|}}}"],
+    "description": "Generate fake name"
+  },
+  "Faker Email": {
+    "prefix": "faker-email",
+    "body": ["{{faker.internet.email}}"],
+    "description": "Generate fake email"
+  },
+  "Faker UUID": {
+    "prefix": "faker-uuid",
+    "body": ["{{faker.datatype.uuid}}"],
+    "description": "Generate UUID"
+  },
+  "Faker Number": {
+    "prefix": "faker-number",
+    "body": ["{{faker.datatype.number}}"],
+    "description": "Generate random number"
+  },
+  "Faker Date": {
+    "prefix": "faker-date",
+    "body": ["{{faker.date.${1|past,future,recent|}}}"],
+    "description": "Generate fake date"
+  },
+  "Mock Endpoint": {
+    "prefix": "mock-endpoint",
+    "body": [
+      "{",
+      "  \"method\": \"${1|GET,POST,PUT,DELETE|}\",",
+      "  \"path\": \"/${2:path}\",",
+      "  \"summary\": \"${3:description}\",",
+      "  \"responses\": [",
+      "    {",
+      "      \"status\": ${4:200},",
+      "      \"body\": {",
+      "        \"$5\"",
+      "      },",
+      "      \"isDefault\": true",
+      "    }",
+      "  ],",
+      "  \"enabled\": true",
+      "}"
+    ],
+    "description": "Create mock endpoint template"
+  }
+}
+

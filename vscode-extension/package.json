@@ -1,0 +1,137 @@
+{
+  "name": "mock-api-studio",
+  "displayName": "Mock API Studio",
+  "description": "VS Code extension for Mock API Studio - Create, test, and manage mock APIs",
+  "version": "1.0.0",
+  "publisher": "mock-api-studio",
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other",
+    "Snippets",
+    "Testing"
+  ],
+  "keywords": [
+    "mock",
+    "api",
+    "testing",
+    "faker",
+    "rest"
+  ],
+  "activationEvents": [
+    "onCommand:mockApiStudio.createEndpoint",
+    "onCommand:mockApiStudio.testEndpoint",
+    "onCommand:mockApiStudio.viewLogs",
+    "onCommand:mockApiStudio.listApis",
+    "onCommand:mockApiStudio.configure",
+    "onLanguage:json"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "mockApiStudio.createEndpoint",
+        "title": "Mock API Studio: Create Endpoint"
+      },
+      {
+        "command": "mockApiStudio.testEndpoint",
+        "title": "Mock API Studio: Test Endpoint"
+      },
+      {
+        "command": "mockApiStudio.viewLogs",
+        "title": "Mock API Studio: View Logs"
+      },
+      {
+        "command": "mockApiStudio.listApis",
+        "title": "Mock API Studio: List APIs"
+      },
+      {
+        "command": "mockApiStudio.configure",
+        "title": "Mock API Studio: Configure Connection"
+      }
+    ],
+    "configuration": {
+      "title": "Mock API Studio",
+      "properties": {
+        "mockApiStudio.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:3000",
+          "description": "Mock API Studio server URL"
+        },
+        "mockApiStudio.apiToken": {
+          "type": "string",
+          "default": "",
+          "description": "API authentication token"
+        },
+        "mockApiStudio.defaultWorkspace": {
+          "type": "string",
+          "default": "",
+          "description": "Default workspace ID"
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "faker-template",
+        "aliases": ["Faker Template", "faker"],
+        "extensions": [".faker"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "faker-template",
+        "scopeName": "source.faker",
+        "path": "./syntaxes/faker.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "json",
+        "path": "./snippets/faker-snippets.json"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mock-api-studio",
+          "title": "Mock API Studio",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "mock-api-studio": [
+        {
+          "id": "mockApiStudio.apis",
+          "name": "APIs"
+        },
+        {
+          "id": "mockApiStudio.logs",
+          "name": "Recent Logs"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./dist/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^18.x",
+    "@types/vscode": "^1.75.0",
+    "@vscode/test-electron": "^2.3.0",
+    "typescript": "^5.0.0",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

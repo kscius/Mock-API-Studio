@@ -1,0 +1,35 @@
+{
+  "name": "Faker Template",
+  "scopeName": "source.faker",
+  "patterns": [
+    {
+      "include": "#faker-expression"
+    }
+  ],
+  "repository": {
+    "faker-expression": {
+      "patterns": [
+        {
+          "name": "meta.embedded.block.faker",
+          "begin": "\\{\\{",
+          "end": "\\}\\}",
+          "patterns": [
+            {
+              "name": "keyword.other.faker",
+              "match": "\\bfaker\\b"
+            },
+            {
+              "name": "entity.name.function.faker",
+              "match": "\\.(\\w+)"
+            },
+            {
+              "name": "constant.numeric.faker",
+              "match": "\\b\\d+\\b"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+
