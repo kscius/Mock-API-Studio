@@ -3,10 +3,11 @@
 // cli/src/index.ts
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { registerLoginCommand } from './commands/login';
-import { registerWorkspaceCommands } from './commands/workspace';
-import { registerApiCommands } from './commands/api';
-import { registerImportCommand } from './commands/import';
+import { registerLoginCommand } from './commands/login.js';
+import { registerWorkspaceCommands } from './commands/workspace.js';
+import { registerApiCommands } from './commands/api.js';
+import { registerImportCommand } from './commands/import.js';
+import { config, getApiUrl, getToken, getApiKey, getCurrentWorkspace, clearConfig } from './config.js';
 
 const program = new Command();
 
@@ -26,8 +27,6 @@ program
   .command('config')
   .description('Show current configuration')
   .action(() => {
-    const { config, getApiUrl, getToken, getApiKey, getCurrentWorkspace } = require('./config');
-    
     console.log(chalk.cyan('Current Configuration:'));
     console.log(chalk.gray('─'.repeat(50)));
     console.log(`API URL:           ${getApiUrl()}`);
@@ -43,7 +42,6 @@ program
   .command('logout')
   .description('Clear authentication credentials')
   .action(() => {
-    const { clearConfig } = require('./config');
     clearConfig();
     console.log(chalk.green('✓ Logged out successfully!'));
   });

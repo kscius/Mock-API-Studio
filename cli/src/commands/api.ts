@@ -3,8 +3,9 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import Table from 'cli-table3';
-import { apiClient } from '../api-client';
-import { getCurrentWorkspace } from '../config';
+import { apiClient } from '../api-client.js';
+import { getCurrentWorkspace } from '../config.js';
+import inquirer from 'inquirer';
 
 export function registerApiCommands(program: Command) {
   const api = program
@@ -63,8 +64,6 @@ export function registerApiCommands(program: Command) {
     .option('-d, --description <description>', 'API description')
     .action(async (options) => {
       try {
-        const inquirer = require('inquirer');
-        
         const workspaceId = options.workspace || getCurrentWorkspace();
         
         if (!workspaceId) {
@@ -123,8 +122,6 @@ export function registerApiCommands(program: Command) {
     .description('Delete an API')
     .action(async (id: string) => {
       try {
-        const inquirer = require('inquirer');
-        
         const { confirm } = await inquirer.prompt([
           {
             type: 'confirm',

@@ -2,6 +2,7 @@
   "name": "@mock-api-studio/cli",
   "version": "1.0.0",
   "description": "Command-line interface for Mock API Studio",
+  "type": "module",
   "main": "dist/index.js",
   "bin": {
     "mock-api": "./dist/index.js"
@@ -10,7 +11,7 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
-    "test": "jest",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -37,7 +38,7 @@
   ],
   "dependencies": {
     "commander": "^15.0.0",
-    "inquirer": "^9.2.12",
+    "inquirer": "^14.0.2",
     "axios": "^1.6.2",
     "chalk": "^5.6.2",
     "ora": "^5.4.1",

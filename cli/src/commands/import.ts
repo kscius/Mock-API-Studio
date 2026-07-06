@@ -2,8 +2,8 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import { apiClient } from '../api-client';
-import { getCurrentWorkspace } from '../config';
+import { apiClient } from '../api-client.js';
+import { getCurrentWorkspace } from '../config.js';
 import * as path from 'path';
 import * as fs from 'fs';
 
