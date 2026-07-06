@@ -22,7 +22,7 @@
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.21.1",
     "recharts": "^2.10.3",
-    "swagger-ui-react": "^5.31.0"
+    "swagger-ui-react": "^5.32.8"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.5",
