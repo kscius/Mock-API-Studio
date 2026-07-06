@@ -20,7 +20,7 @@ export function ResponsePreview({ responseBody, onClose }: ResponsePreviewProps)
 
       // Check if there are Faker placeholders
       const bodyString = JSON.stringify(responseBody);
-      const hasFaker = /\{\{faker\.[a-zA-Z0-9\._-]+\}\}/i.test(bodyString);
+      const hasFaker = /\{\{faker\.[a-zA-Z0-9._-]+\}\}/i.test(bodyString);
 
       if (!hasFaker) {
         setError('No Faker.js placeholders found in response body');

@@ -269,8 +269,6 @@ export class ApiDefinitionsService {
       where: { workspaceId, slug: api.slug, isLatest: true },
     });
 
-    let apiRecord;
-
     if (existing && !overwrite) {
       throw new Error('API with this slug already exists in this workspace. Set overwrite=true to replace.');
     }
@@ -281,7 +279,7 @@ export class ApiDefinitionsService {
     }
 
     // Create API
-    apiRecord = await this.prisma.apiDefinition.create({
+    const apiRecord = await this.prisma.apiDefinition.create({
       data: {
         workspaceId,
         name: api.name,

@@ -1,0 +1,39 @@
+title: Q&A
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask a question about Mock API Studio. Search [existing discussions](https://github.com/kscius/Mock-API-Studio/discussions) first if you can.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: e.g. 1.0.0 or main @ commit
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Backend API
+        - Frontend UI
+        - CLI
+        - VS Code extension
+        - Docker / deployment
+        - Terraform provider
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What are you trying to do, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Logs, screenshots, or config snippets (redact secrets).

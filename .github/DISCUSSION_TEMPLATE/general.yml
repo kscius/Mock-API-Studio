@@ -1,0 +1,28 @@
+title: General Discussion
+labels:
+  - discussion
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for joining the Mock API Studio community. Use this template for questions, ideas, and feedback.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Topic
+      options:
+        - Usage / how-to
+        - Feature idea
+        - Integration (CI, Docker, Terraform)
+        - VS Code extension
+        - Self-hosting / deployment
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: body
+    attributes:
+      label: What would you like to discuss?
+      placeholder: Describe your question or idea. Include version, OS, and steps to reproduce if relevant.
+    validations:
+      required: true

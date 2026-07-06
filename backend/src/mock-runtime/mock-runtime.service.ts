@@ -1,4 +1,5 @@
 // backend/src/mock-runtime/mock-runtime.service.ts
+import * as crypto from "crypto";
 import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { RedisService } from '../common/redis/redis.service';
@@ -400,7 +401,6 @@ export class MockRuntimeService {
   }
 
   private generateETag(body: any): string {
-    const crypto = require('crypto');
     const content = typeof body === 'string' ? body : JSON.stringify(body);
     return `"${crypto.createHash('md5').update(content).digest('hex')}"`;
   }

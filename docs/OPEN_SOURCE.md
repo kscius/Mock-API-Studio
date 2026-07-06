@@ -18,14 +18,16 @@ This document tracks Mock API Studio readiness for public open source adoption.
 
 ## Before v1.0.0 public release
 
+See [PUBLISHING.md](./PUBLISHING.md) for step-by-step instructions.
+
 - [ ] Publish `@mock-api-studio/cli` to npm (set `NPM_TOKEN` secret)
 - [ ] Configure `DOCKER_USERNAME` / `DOCKER_PASSWORD` for image publishing
-- [ ] Add VS Code extension PNG icon (`vscode-extension/images/icon.png`) — done locally; publish pending
-- [ ] Publish VS Code extension to Marketplace
+- [x] Add VS Code extension PNG icon (`vscode-extension/images/icon.png`)
+- [ ] Publish VS Code extension to Marketplace (set `VSCE_PAT`; release workflow ready)
 - [ ] Publish Terraform provider to Registry
-- [ ] Enable GitHub Discussions for community support
+- [x] GitHub Discussions templates (enable Discussions in repo settings)
 
-- [x] Pre-commit hooks (husky + lint-staged scaffold; expand when eslint configs exist)
+- [x] ESLint configuration for backend and frontend
 - [x] Container scanning workflow (Trivy)
 
 - gRPC mocking

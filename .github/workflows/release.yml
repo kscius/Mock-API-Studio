@@ -77,3 +77,20 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/mock-api-studio-frontend:${{ github.ref_name }}
             ${{ secrets.DOCKER_USERNAME }}/mock-api-studio-frontend:latest
+
+  publish-vscode-extension:
+    name: Publish VS Code extension
+    runs-on: ubuntu-latest
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/v')
+    env:
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: cd vscode-extension && npm install && npm run compile
+      - name: Publish to Marketplace
+        if: env.VSCE_PAT != ''
+        run: cd vscode-extension && npx vsce publish -p "$VSCE_PAT"
