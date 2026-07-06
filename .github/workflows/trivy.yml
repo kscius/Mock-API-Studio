@@ -19,7 +19,7 @@ jobs:
         run: docker build -t mock-api-studio-backend:scan ./backend
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: mock-api-studio-backend:scan
           format: sarif
@@ -45,7 +45,7 @@ jobs:
         run: docker build -t mock-api-studio-frontend:scan ./frontend
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: mock-api-studio-frontend:scan
           format: sarif
