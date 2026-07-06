@@ -38,6 +38,7 @@ export const WorkspaceSelector: React.FC = () => {
           cursor: 'pointer',
         }}
       >
+        <option value="">Select Workspace</option>
         {workspaces.map(workspace => (
           <option key={workspace.id} value={workspace.id}>
             {workspace.name} ({workspace.slug})

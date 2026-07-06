@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { DashboardPage } from './DashboardPage';
@@ -5,8 +6,11 @@ import { WorkspaceContext } from '../contexts/WorkspaceContext';
 import { apiDefinitionsApi } from '../api/api-definitions';
 import '@testing-library/jest-dom';
 
-// Mock the API
-jest.mock('../api/api-definitions');
+vi.mock('../api/api-definitions', () => ({
+  apiDefinitionsApi: {
+    getAll: vi.fn(),
+  },
+}));
 
 const mockWorkspace = {
   id: 'ws-1',
@@ -38,8 +42,9 @@ const renderWithContext = (component: React.ReactNode) => {
         value={{
           currentWorkspace: mockWorkspace,
           workspaces: [mockWorkspace],
-          setCurrentWorkspace: jest.fn(),
-          loadWorkspaces: jest.fn(),
+          setCurrentWorkspace: vi.fn(),
+          refreshWorkspaces: vi.fn().mockResolvedValue(undefined),
+          loading: false,
         }}
       >
         {component}
@@ -50,19 +55,21 @@ const renderWithContext = (component: React.ReactNode) => {
 
 describe('DashboardPage', () => {
   beforeEach(() => {
-    (apiDefinitionsApi.getAll as jest.Mock).mockResolvedValue({
+    vi.mocked(apiDefinitionsApi.getAll).mockResolvedValue({
       data: mockApis,
-    });
+    } as any);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders dashboard title', async () => {
     renderWithContext(<DashboardPage />);
 
-    expect(screen.getByText('Mock APIs')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Mock APIs')).toBeInTheDocument();
+    });
   });
 
   it('loads and displays APIs', async () => {
@@ -73,17 +80,19 @@ describe('DashboardPage', () => {
     });
   });
 
-  it('shows create and import buttons', () => {
+  it('shows create and import buttons', async () => {
     renderWithContext(<DashboardPage />);
 
-    expect(screen.getByText('+ Create API')).toBeInTheDocument();
-    expect(screen.getByText('Import JSON')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('+ Create API')).toBeInTheDocument();
+      expect(screen.getByText('Import JSON')).toBeInTheDocument();
+    });
   });
 
   it('shows empty state when no APIs', async () => {
-    (apiDefinitionsApi.getAll as jest.Mock).mockResolvedValue({
+    vi.mocked(apiDefinitionsApi.getAll).mockResolvedValue({
       data: [],
-    });
+    } as any);
 
     renderWithContext(<DashboardPage />);
 
@@ -97,7 +106,7 @@ describe('DashboardPage', () => {
   });
 
   it('handles API fetch error', async () => {
-    (apiDefinitionsApi.getAll as jest.Mock).mockRejectedValue(
+    vi.mocked(apiDefinitionsApi.getAll).mockRejectedValue(
       new Error('Network error')
     );
 
@@ -114,4 +123,3 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Loading APIs...')).toBeInTheDocument();
   });
 });
-

@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { WorkspaceSelector } from './WorkspaceSelector';
 import { WorkspaceContext } from '../contexts/WorkspaceContext';
@@ -20,15 +21,20 @@ const mockWorkspaces = [
   },
 ];
 
+const baseContext = {
+  workspaces: mockWorkspaces,
+  setCurrentWorkspace: vi.fn(),
+  refreshWorkspaces: vi.fn().mockResolvedValue(undefined),
+  loading: false,
+};
+
 describe('WorkspaceSelector', () => {
   it('renders current workspace name', () => {
     render(
       <WorkspaceContext.Provider
         value={{
+          ...baseContext,
           currentWorkspace: mockWorkspaces[0],
-          workspaces: mockWorkspaces,
-          setCurrentWorkspace: jest.fn(),
-          loadWorkspaces: jest.fn(),
         }}
       >
         <WorkspaceSelector />
@@ -42,10 +48,8 @@ describe('WorkspaceSelector', () => {
     render(
       <WorkspaceContext.Provider
         value={{
+          ...baseContext,
           currentWorkspace: null,
-          workspaces: mockWorkspaces,
-          setCurrentWorkspace: jest.fn(),
-          loadWorkspaces: jest.fn(),
         }}
       >
         <WorkspaceSelector />
@@ -55,4 +59,3 @@ describe('WorkspaceSelector', () => {
     expect(screen.getByText(/Select Workspace/)).toBeInTheDocument();
   });
 });
-

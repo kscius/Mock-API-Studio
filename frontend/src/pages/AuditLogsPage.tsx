@@ -135,8 +135,10 @@ export function AuditLogsPage() {
       <div className="filters-container">
         <div className="filters-grid">
           <div className="filter-group">
-            <label>Action</label>
+            <label htmlFor="action-filter">Action</label>
             <select
+              id="action-filter"
+              aria-label="Action"
               className="input"
               value={actionFilter}
               onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
@@ -150,8 +152,10 @@ export function AuditLogsPage() {
           </div>
 
           <div className="filter-group">
-            <label>Entity Type</label>
+            <label htmlFor="entity-type-filter">Entity Type</label>
             <select
+              id="entity-type-filter"
+              aria-label="Entity Type"
               className="input"
               value={entityTypeFilter}
               onChange={(e) => { setEntityTypeFilter(e.target.value); setPage(1); }}

@@ -25,15 +25,18 @@
     "test:cli": "cd cli && npm test",
     "test:e2e": "playwright test",
     "test:all": "npm run test:backend && npm run test:frontend",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
     "prisma:migrate": "cd backend && npm run prisma:migrate",
     "prisma:seed": "cd backend && npm run prisma:seed",
-    "prisma:studio": "cd backend && npm run prisma:studio"
+    "prisma:studio": "cd backend && npm run prisma:studio",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "@playwright/test": "^1.40.1"
+    "@playwright/test": "^1.40.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3"
   }
 }
 
