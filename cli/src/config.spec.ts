@@ -1,5 +1,5 @@
 // cli/src/config.spec.ts
-import { config, getApiUrl, getToken, setToken, getApiKey, setApiKey, getCurrentWorkspace, setCurrentWorkspace, clearConfig } from './config';
+import { config, getApiUrl, getToken, setToken, getApiKey, setApiKey, getCurrentWorkspace, setCurrentWorkspace, clearConfig, getAuthHeader } from './config.js';
 
 describe('Config', () => {
   beforeEach(() => {
@@ -47,8 +47,6 @@ describe('Config', () => {
   });
 
   it('should prefer token over API key in auth header', () => {
-    const { getAuthHeader } = require('./config');
-    
     setToken('test-token');
     setApiKey('test-key');
     
@@ -58,8 +56,6 @@ describe('Config', () => {
   });
 
   it('should use API key if no token', () => {
-    const { getAuthHeader } = require('./config');
-    
     setApiKey('test-key');
     
     const header = getAuthHeader();
@@ -68,8 +64,6 @@ describe('Config', () => {
   });
 
   it('should return empty header if no auth', () => {
-    const { getAuthHeader } = require('./config');
-    
     const header = getAuthHeader();
     expect(header).toEqual({});
   });

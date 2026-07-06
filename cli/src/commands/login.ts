@@ -3,8 +3,8 @@ import { Command } from 'commander';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import ora from 'ora';
-import { apiClient } from '../api-client';
-import { setToken } from '../config';
+import { apiClient } from '../api-client.js';
+import { setToken, setApiKey } from '../config.js';
 
 export function registerLoginCommand(program: Command) {
   program
@@ -16,8 +16,6 @@ export function registerLoginCommand(program: Command) {
     .action(async (options) => {
       try {
         if (options.apiKey) {
-          // Use API key
-          const { setApiKey } = require('../config');
           setApiKey(options.apiKey);
           console.log(chalk.green('✓ API key saved successfully!'));
           return;

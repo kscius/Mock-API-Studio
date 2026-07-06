@@ -1,6 +1,6 @@
 // cli/src/api-client.ts
 import axios, { AxiosInstance } from 'axios';
-import { getApiUrl, getAuthHeader } from './config';
+import { getApiUrl, getAuthHeader } from './config.js';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -17,7 +17,7 @@ class ApiClient {
     // Add auth header to every request
     this.client.interceptors.request.use((config) => {
       const authHeader = getAuthHeader();
-      config.headers = { ...config.headers, ...authHeader };
+      Object.assign(config.headers, authHeader);
       return config;
     });
   }

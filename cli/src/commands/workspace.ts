@@ -3,8 +3,9 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import Table from 'cli-table3';
-import { apiClient } from '../api-client';
-import { setCurrentWorkspace, getCurrentWorkspace } from '../config';
+import { apiClient } from '../api-client.js';
+import { setCurrentWorkspace, getCurrentWorkspace } from '../config.js';
+import inquirer from 'inquirer';
 
 export function registerWorkspaceCommands(program: Command) {
   const workspace = program
@@ -87,8 +88,6 @@ export function registerWorkspaceCommands(program: Command) {
     .option('-d, --description <description>', 'Workspace description')
     .action(async (options) => {
       try {
-        const inquirer = require('inquirer');
-        
         const answers = await inquirer.prompt([
           {
             type: 'input',

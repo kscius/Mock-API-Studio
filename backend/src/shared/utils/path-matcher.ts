@@ -1,5 +1,5 @@
 // backend/src/shared/utils/path-matcher.ts
-import { pathToRegexp, Key } from 'path-to-regexp';
+import { match } from 'path-to-regexp';
 
 export interface PathMatch {
   params: Record<string, string>;
@@ -11,18 +11,19 @@ export class PathMatcher {
    * Returns params if matched, null if not matched
    */
   static match(template: string, requestPath: string): PathMatch | null {
-    const keys: Key[] = [];
-    const regexp = pathToRegexp(template, keys);
-    const match = regexp.exec(requestPath);
+    const matcher = match(template);
+    const result = matcher(requestPath);
 
-    if (!match) {
+    if (!result) {
       return null;
     }
 
     const params: Record<string, string> = {};
-    keys.forEach((key, index) => {
-      params[key.name] = match[index + 1];
-    });
+    for (const [key, value] of Object.entries(result.params)) {
+      if (value !== undefined) {
+        params[key] = Array.isArray(value) ? value[0] : value;
+      }
+    }
 
     return { params };
   }
