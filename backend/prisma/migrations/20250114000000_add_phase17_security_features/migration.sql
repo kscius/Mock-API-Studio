@@ -48,7 +48,7 @@ ALTER TABLE "api_definitions" ADD COLUMN "isLatest" BOOLEAN NOT NULL DEFAULT tru
 ALTER TABLE "api_definitions" ADD COLUMN "parentId" TEXT;
 
 -- Drop old unique constraint (workspaceId, slug)
-ALTER TABLE "api_definitions" DROP CONSTRAINT "api_definitions_workspaceId_slug_key";
+DROP INDEX IF EXISTS "api_definitions_workspaceId_slug_key";
 
 -- Add new unique constraint including version (workspaceId, slug, version)
 ALTER TABLE "api_definitions" ADD CONSTRAINT "api_definitions_workspaceId_slug_version_key" UNIQUE("workspaceId", "slug", "version");

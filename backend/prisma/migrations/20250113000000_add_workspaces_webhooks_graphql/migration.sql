@@ -28,7 +28,7 @@ CREATE TABLE "webhook_subscriptions" (
 
 -- AlterTable ApiDefinition: add workspaceId, change slug unique constraint
 ALTER TABLE "api_definitions" ADD COLUMN "workspaceId" TEXT;
-ALTER TABLE "api_definitions" DROP CONSTRAINT "api_definitions_slug_key";
+DROP INDEX IF EXISTS "api_definitions_slug_key";
 
 -- AlterTable ApiEndpoint: add GraphQL fields
 ALTER TABLE "api_endpoints" ADD COLUMN "type" TEXT NOT NULL DEFAULT 'REST';
