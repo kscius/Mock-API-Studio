@@ -41,5 +41,22 @@ export class CreateEndpointDto {
   @IsOptional()
   @IsIn(['query', 'mutation', 'subscription'])
   operationType?: string;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['once', 'loop'])
+  sequenceMode?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  chaosEnabled?: boolean;
+
+  @IsObject()
+  @IsOptional()
+  chaosConfig?: Record<string, unknown>;
+
+  @IsBoolean()
+  @IsOptional()
+  stateEnabled?: boolean;
 }
 

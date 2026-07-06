@@ -97,7 +97,7 @@ export class AuthService {
     return this.sanitizeUser(user);
   }
 
-  async createApiKey(userId: string, name: string, scope: string[] = ['*'], expiresAt?: Date) {
+  async createApiKey(userId: string, name: string, scopes: string[] = ['*'], expiresAt?: Date) {
     // Generar key real (lo devolvemos 1 sola vez)
     const rawKey = `mas_${randomBytes(32).toString('hex')}`;
     const keyHash = await bcrypt.hash(rawKey, 10);
@@ -107,7 +107,7 @@ export class AuthService {
         key: keyHash,
         name,
         userId,
-        scope,
+        scopes,
         expiresAt,
       },
     });
@@ -152,7 +152,7 @@ export class AuthService {
       select: {
         id: true,
         name: true,
-        scope: true,
+        scopes: true,
         isActive: true,
         lastUsedAt: true,
         expiresAt: true,

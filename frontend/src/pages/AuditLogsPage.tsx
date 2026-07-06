@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { auditLogsApi } from '../api/audit-logs';
 import { AuditLog } from '../api/types';
 import toast from 'react-hot-toast';
 import './AuditLogsPage.css';
 
 export function AuditLogsPage() {
-  const navigate = useNavigate();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);

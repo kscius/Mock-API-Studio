@@ -51,9 +51,26 @@ export interface ApiEndpoint {
   responses: MockResponse[];
   delayMs: number;
   enabled: boolean;
-  type: string; // REST | GRAPHQL
+  type: string;
   operationName?: string;
-  operationType?: string; // query | mutation | subscription
+  operationType?: string;
+  proxyMode?: boolean;
+  proxyTarget?: string | null;
+  proxyTimeout?: number;
+  deduplication?: boolean;
+  cacheEnabled?: boolean;
+  cacheTTL?: number;
+  cacheControl?: string;
+  sequenceMode?: 'once' | 'loop' | null;
+  chaosEnabled?: boolean;
+  chaosConfig?: {
+    errorRate?: number;
+    timeoutRate?: number;
+    minDelayMs?: number;
+    maxDelayMs?: number;
+    errorStatus?: number;
+  };
+  stateEnabled?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -63,6 +80,11 @@ export interface MockResponse {
   headers?: Record<string, string>;
   body?: any;
   isDefault?: boolean;
+  match?: {
+    query?: Record<string, string | number | boolean>;
+    headers?: Record<string, string>;
+    bodyEquals?: unknown;
+  };
 }
 
 export interface CreateApiDefinitionDto {

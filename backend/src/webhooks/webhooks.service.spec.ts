@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WebhooksService } from './webhooks.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { ConfigService } from '../config/config.service';
 
 describe('WebhooksService', () => {
   let service: WebhooksService;
@@ -16,11 +17,17 @@ describe('WebhooksService', () => {
     },
   };
 
+  const mockConfigService = {
+    webhookRetryAttempts: 3,
+    webhookRetryDelayMs: 1000,
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WebhooksService,
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 

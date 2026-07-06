@@ -17,10 +17,12 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'cd frontend && npm run preview',
-    url: 'http://localhost:8080',
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: 'cd frontend && npm run preview',
+        url: 'http://localhost:8080',
+        reuseExistingServer: true,
+      },
 });
 

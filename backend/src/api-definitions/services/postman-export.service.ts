@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ApiDefinition, ApiEndpoint } from '@prisma/client';
 
-interface PostmanCollection {
+export interface PostmanCollection {
   info: {
     name: string;
     description?: string;
@@ -59,6 +59,11 @@ interface PostmanResponse {
   header: PostmanHeader[];
   cookie: any[];
   body: string;
+}
+
+interface SchemaProperty {
+  type?: string;
+  example?: unknown;
 }
 
 @Injectable()
@@ -155,9 +160,10 @@ export class PostmanExportService {
       return {};
     }
 
-    const example: any = {};
-    for (const [key, prop] of Object.entries(schema.properties as any)) {
-      if (prop.example) {
+    const example: Record<string, unknown> = {};
+    const properties = schema.properties as Record<string, SchemaProperty>;
+    for (const [key, prop] of Object.entries(properties)) {
+      if (prop.example !== undefined) {
         example[key] = prop.example;
       } else if (prop.type === 'string') {
         example[key] = `example_${key}`;

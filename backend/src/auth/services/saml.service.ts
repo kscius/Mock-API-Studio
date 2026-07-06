@@ -1,5 +1,5 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 
 // Note: For full SAML implementation, install: npm install passport-saml @types/passport-saml
@@ -59,8 +59,7 @@ export class SamlService {
           data: {
             email,
             name: name || email.split('@')[0],
-            password: '', // SSO users don't have passwords
-            isEmailVerified: true,
+            password: '',
           },
         });
       }

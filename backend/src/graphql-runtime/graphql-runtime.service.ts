@@ -115,8 +115,8 @@ export class GraphQLRuntimeService {
     const cached = await this.redis.get(cacheKey);
     if (cached) return JSON.parse(cached);
 
-    const api = await this.prisma.apiDefinition.findUnique({
-      where: { workspaceId_slug: { workspaceId, slug: apiSlug } },
+    const api = await this.prisma.apiDefinition.findFirst({
+      where: { workspaceId, slug: apiSlug, isLatest: true },
       include: { endpoints: true },
     });
 

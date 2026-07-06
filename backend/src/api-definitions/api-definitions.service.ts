@@ -33,8 +33,8 @@ export class ApiDefinitionsService {
   }
 
   findOneBySlug(workspaceId: string, slug: string) {
-    return this.prisma.apiDefinition.findUnique({
-      where: { workspaceId_slug: { workspaceId, slug } },
+    return this.prisma.apiDefinition.findFirst({
+      where: { workspaceId, slug, isLatest: true },
       include: { endpoints: true },
     });
   }
@@ -110,11 +110,13 @@ export class ApiDefinitionsService {
   }
 
   async updateEndpoint(endpointId: string, dto: UpdateEndpointDto) {
+    const { chaosConfig, ...rest } = dto;
     const endpoint = await this.prisma.apiEndpoint.update({
       where: { id: endpointId },
       data: {
-        ...dto,
+        ...rest,
         method: dto.method ? dto.method.toUpperCase() : undefined,
+        ...(chaosConfig !== undefined ? { chaosConfig: chaosConfig as object } : {}),
       },
       include: { api: true },
     });
@@ -200,6 +202,29 @@ export class ApiDefinitionsService {
     return duplicated;
   }
 
+  async getEndpointHistory(endpointId: string, limit = 50) {
+    return this.prisma.mockRequest.findMany({
+      where: { endpointId },
+      orderBy: { createdAt: 'desc' },
+      take: Math.min(limit, 200),
+    });
+  }
+
+  async resetApiState(apiId: string) {
+    const api = await this.prisma.apiDefinition.findUnique({
+      where: { id: apiId },
+      include: { endpoints: true },
+    });
+    if (!api) {
+      throw new Error('API not found');
+    }
+    for (const ep of api.endpoints) {
+      await this.redis.delPattern(`mock:state:${ep.id}:*`);
+      await this.redis.del(`mock:seq:${ep.id}`);
+    }
+    return { message: 'State and sequence reset for all endpoints', endpointCount: api.endpoints.length };
+  }
+
   // ========== IMPORT / EXPORT ==========
 
   async exportApi(apiId: string) {
@@ -240,8 +265,8 @@ export class ApiDefinitionsService {
     const { api, endpoints } = data;
 
     // Check if API exists in this workspace
-    const existing = await this.prisma.apiDefinition.findUnique({
-      where: { workspaceId_slug: { workspaceId, slug: api.slug } },
+    const existing = await this.prisma.apiDefinition.findFirst({
+      where: { workspaceId, slug: api.slug, isLatest: true },
     });
 
     let apiRecord;

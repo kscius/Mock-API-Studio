@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { workspacesApi } from '../api/workspaces';
 import { CreateWorkspaceDto } from '../api/types';

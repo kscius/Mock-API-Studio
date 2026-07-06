@@ -1,4 +1,4 @@
-import apiClient from './client';
+import { apiClient } from './client';
 
 export const fakerDocsApi = {
   getAvailableMethods: () => apiClient.get('/faker-docs/methods'),

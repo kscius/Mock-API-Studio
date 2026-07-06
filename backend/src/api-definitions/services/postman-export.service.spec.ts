@@ -51,8 +51,8 @@ describe('PostmanExportService', () => {
       expect(collection.info.schema).toContain('postman');
       expect(collection.item).toHaveLength(1);
       expect(collection.variable).toHaveLength(2);
-      expect(collection.variable[0].key).toBe('baseUrl');
-      expect(collection.variable[0].value).toBe(`${baseUrl}/mock/${mockApi.slug}`);
+      expect(collection.variable?.[0].key).toBe('baseUrl');
+      expect(collection.variable?.[0].value).toBe(`${baseUrl}/mock/${mockApi.slug}`);
     });
 
     it('should handle path parameters correctly', () => {

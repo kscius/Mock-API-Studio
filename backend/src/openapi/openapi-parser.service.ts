@@ -7,7 +7,7 @@ import { ImportExportApiFile } from '../shared/types/api-import-export';
 export class OpenApiParserService {
   async parseOpenApiSpec(spec: any): Promise<ImportExportApiFile> {
     // Validar y dereferenciar el spec
-    const api = await SwaggerParser.validate(spec);
+    const api = await SwaggerParser.validate(spec) as Record<string, any>;
 
     const info = api.info || {};
     const paths = api.paths || {};
@@ -26,7 +26,7 @@ export class OpenApiParserService {
     // Convertir paths a endpoints
     const endpoints: any[] = [];
 
-    for (const [path, pathItem] of Object.entries(paths as any)) {
+    for (const [path, pathItem] of Object.entries(paths as Record<string, Record<string, any>>)) {
       const methods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'];
 
       for (const method of methods) {

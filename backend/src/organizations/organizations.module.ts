@@ -3,10 +3,7 @@ import { OrganizationsService } from './organizations.service';
 import { TeamsService } from './teams.service';
 import { CommentsService } from './comments.service';
 import { ChangeRequestsService } from './change-requests.service';
-import { OrganizationsController } from './organizations.controller';
-import { TeamsController } from './teams.controller';
-import { CommentsController } from './comments.controller';
-import { ChangeRequestsController } from './change-requests.controller';
+import { OrganizationsController, TeamsController, CommentsController, ChangeRequestsController } from './organizations.controller';
 import { PrismaModule } from '../common/prisma/prisma.module';
 
 @Module({

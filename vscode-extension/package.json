@@ -4,7 +4,7 @@
   "description": "VS Code extension for Mock API Studio - Create, test, and manage mock APIs",
   "version": "1.0.0",
   "publisher": "mock-api-studio",
-  "icon": "images/icon.png",
+  "icon": "images/icon.svg",
   "engines": {
     "vscode": "^1.75.0"
   },

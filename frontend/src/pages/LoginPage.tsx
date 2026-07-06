@@ -12,7 +12,7 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Si ya está autenticado, redirigir
+  // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated) {
       navigate('/');
@@ -29,7 +29,7 @@ export const LoginPage: React.FC = () => {
       navigate('/');
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Error al iniciar sesión');
+      setError(err.response?.data?.message || 'Failed to sign in');
     } finally {
       setLoading(false);
     }
@@ -55,7 +55,7 @@ export const LoginPage: React.FC = () => {
           🎭 Mock API Studio
         </h1>
         <p style={{ textAlign: 'center', color: '#666', marginBottom: '2rem' }}>
-          Inicia sesión para continuar
+          Sign in to continue
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -68,7 +68,7 @@ export const LoginPage: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="usuario@ejemplo.com"
+              placeholder="user@example.com"
               style={{
                 width: '100%',
                 padding: '0.75rem',
@@ -81,7 +81,7 @@ export const LoginPage: React.FC = () => {
 
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
-              Contraseña
+              Password
             </label>
             <input
               type="password"
@@ -129,7 +129,7 @@ export const LoginPage: React.FC = () => {
               transition: 'background 0.2s',
             }}
           >
-            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
@@ -141,7 +141,7 @@ export const LoginPage: React.FC = () => {
           margin: '1.5rem 0',
         }}>
           <div style={{ flex: 1, height: '1px', background: '#ddd' }} />
-          <span style={{ color: '#666', fontSize: '0.9rem' }}>O continuar con</span>
+          <span style={{ color: '#666', fontSize: '0.9rem' }}>Or continue with</span>
           <div style={{ flex: 1, height: '1px', background: '#ddd' }} />
         </div>
 
@@ -208,9 +208,9 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center', color: '#666' }}>
-          ¿No tienes cuenta?{' '}
+          Don&apos;t have an account?{' '}
           <Link to="/register" style={{ color: '#667eea', textDecoration: 'none', fontWeight: 600 }}>
-            Regístrate aquí
+            Sign up here
           </Link>
         </div>
       </div>

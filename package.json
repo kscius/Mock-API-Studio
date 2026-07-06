@@ -1,9 +1,17 @@
 {
   "name": "mock-api-studio",
   "version": "1.0.0",
-  "description": "Mock API Studio - Monorepo",
+  "description": "Mock API Studio - Enterprise-grade mock API platform",
   "license": "MIT",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kscius/Mock-API-Studio.git"
+  },
+  "homepage": "https://github.com/kscius/Mock-API-Studio#readme",
+  "bugs": {
+    "url": "https://github.com/kscius/Mock-API-Studio/issues"
+  },
   "scripts": {
     "dev:backend": "cd backend && npm run start:dev",
     "dev:frontend": "cd frontend && npm run dev",

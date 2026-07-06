@@ -39,7 +39,7 @@ describe('TwoFactorService', () => {
       expect(result.secret).toBeDefined();
       expect(result.otpauthUrl).toBeDefined();
       expect(result.otpauthUrl).toContain('otpauth://totp/');
-      expect(result.otpauthUrl).toContain(email);
+      expect(decodeURIComponent(result.otpauthUrl)).toContain(email);
     });
   });
 

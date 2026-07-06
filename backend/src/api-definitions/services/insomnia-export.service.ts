@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ApiDefinition, ApiEndpoint } from '@prisma/client';
 
-interface InsomniaCollection {
+export interface InsomniaCollection {
   _type: string;
   __export_format: number;
   __export_date: string;
@@ -9,12 +9,18 @@ interface InsomniaCollection {
   resources: InsomniaResource[];
 }
 
+interface SchemaProperty {
+  type?: string;
+  example?: unknown;
+}
+
 interface InsomniaResource {
   _id: string;
   _type: string;
   parentId?: string;
   name: string;
-  description?: string;
+  description?: string | null;
+  data?: Record<string, string>;
   url?: string;
   method?: string;
   headers?: Array<{ name: string; value: string }>;
@@ -142,9 +148,10 @@ export class InsomniaExportService {
       return {};
     }
 
-    const example: any = {};
-    for (const [key, prop] of Object.entries(schema.properties as any)) {
-      if (prop.example) {
+    const example: Record<string, unknown> = {};
+    const properties = schema.properties as Record<string, SchemaProperty>;
+    for (const [key, prop] of Object.entries(properties)) {
+      if (prop.example !== undefined) {
         example[key] = prop.example;
       } else if (prop.type === 'string') {
         example[key] = `example_${key}`;

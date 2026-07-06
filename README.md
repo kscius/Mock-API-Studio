@@ -1,8 +1,12 @@
 # 🎭 Mock API Studio
 
-A complete enterprise-grade solution for designing, managing, and serving mock APIs with multi-tenancy, webhooks, GraphQL support, and comprehensive testing.
+[![CI](https://github.com/kscius/Mock-API-Studio/actions/workflows/ci.yml/badge.svg)](https://github.com/kscius/Mock-API-Studio/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CodeQL](https://github.com/kscius/Mock-API-Studio/actions/workflows/codeql.yml/badge.svg)](https://github.com/kscius/Mock-API-Studio/actions/workflows/codeql.yml)
 
-> **⭐ PRODUCTION-READY**: Now with 80%+ test coverage, configurable caching, webhook retries, dark mode, Prometheus metrics, CI/CD pipeline, and Kubernetes manifests.
+A complete enterprise-grade open source solution for designing, managing, and serving mock APIs with multi-tenancy, webhooks, GraphQL support, and comprehensive testing.
+
+> **Production-ready**: Backend ≥80% test coverage threshold, frontend ≥70%, configurable caching, webhook retries, dark mode, Prometheus metrics, CI/CD pipeline, and Kubernetes manifests.
 
 ## 🚀 Features
 
@@ -156,8 +160,8 @@ mock-api-studio/
 
 1. **Clone and start**
 ```bash
-git clone <repository-url>
-cd mock-api-studio
+git clone https://github.com/kscius/Mock-API-Studio.git
+cd Mock-API-Studio
 docker compose up --build
 ```
 

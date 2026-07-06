@@ -1,4 +1,4 @@
-import apiClient from './client';
+import { apiClient } from './client';
 import { Workspace, CreateWorkspaceDto, UpdateWorkspaceDto } from './types';
 
 export const workspacesApi = {

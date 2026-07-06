@@ -53,7 +53,7 @@ async function main() {
         method: 'GET',
         path: '/posts',
         summary: 'Get all posts',
-        requestSchema: null,
+        requestSchema: undefined,
         responses: [
           {
             status: 200,
@@ -74,7 +74,7 @@ async function main() {
         method: 'GET',
         path: '/posts/:id',
         summary: 'Get a post by ID',
-        requestSchema: null,
+        requestSchema: undefined,
         responses: [
           {
             status: 200,
@@ -121,7 +121,7 @@ async function main() {
         method: 'GET',
         path: '/users',
         summary: 'Get all users',
-        requestSchema: null,
+        requestSchema: undefined,
         responses: [
           {
             status: 200,
@@ -162,7 +162,7 @@ async function main() {
         method: 'GET',
         path: '/users/:username',
         summary: 'Get user by username',
-        requestSchema: null,
+        requestSchema: undefined,
         responses: [
           {
             status: 200,
@@ -192,7 +192,7 @@ async function main() {
         method: 'GET',
         path: '/repos/:owner/:repo',
         summary: 'Get repository',
-        requestSchema: null,
+        requestSchema: undefined,
         responses: [
           {
             status: 200,

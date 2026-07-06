@@ -29,5 +29,21 @@ export class UpdateEndpointDto {
   @IsBoolean()
   @IsOptional()
   enabled?: boolean;
+
+  @IsString()
+  @IsOptional()
+  sequenceMode?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  chaosEnabled?: boolean;
+
+  @IsObject()
+  @IsOptional()
+  chaosConfig?: Record<string, unknown>;
+
+  @IsBoolean()
+  @IsOptional()
+  stateEnabled?: boolean;
 }
 

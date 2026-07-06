@@ -11,6 +11,8 @@ import { WebhooksService } from '../webhooks/webhooks.service';
 import { FakerTemplatingService } from '../shared/faker-templating.service';
 import { ProxyService } from './services/proxy.service';
 import { DeduplicationService } from './services/deduplication.service';
+import { MockStateService } from './services/mock-state.service';
+import { ChaosService } from './services/chaos.service';
 
 interface ResponseMatchRule {
   query?: Record<string, string | number | boolean>;
@@ -46,6 +48,8 @@ export class MockRuntimeService {
     private readonly fakerTemplating: FakerTemplatingService,
     private readonly proxyService: ProxyService,
     private readonly deduplicationService: DeduplicationService,
+    private readonly mockState: MockStateService,
+    private readonly chaos: ChaosService,
     @Inject(forwardRef(() => WebhooksService))
     private readonly webhooks: WebhooksService,
   ) {}
@@ -155,6 +159,39 @@ export class MockRuntimeService {
 
     const responses: MockResponse[] = matchedEndpoint.responses ?? [];
 
+    // Chaos injection (before response selection)
+    if (matchedEndpoint.chaosEnabled && matchedEndpoint.chaosConfig) {
+      const chaosResult = this.chaos.applyChaos(matchedEndpoint.chaosConfig);
+      if (chaosResult.extraDelayMs > 0) {
+        await new Promise((r) => setTimeout(r, chaosResult.extraDelayMs));
+      }
+      if (chaosResult.shouldTimeout) {
+        await new Promise((r) => setTimeout(r, 30000));
+        throw new BadRequestException('Gateway Timeout (chaos simulation)');
+      }
+      if (chaosResult.shouldFail) {
+        return {
+          statusCode: chaosResult.errorStatus,
+          headers: { 'Content-Type': 'application/json', 'X-Mock-Chaos': 'true' },
+          body: { error: 'Chaos injection: simulated failure' },
+        };
+      }
+    }
+
+    // Sequence mode: pick response by call index
+    let response: MockResponse | undefined;
+    if (matchedEndpoint.sequenceMode && responses.length > 0) {
+      const seqIndex = await this.chaos.getSequenceIndex(matchedEndpoint.id);
+      const mode = matchedEndpoint.sequenceMode as 'once' | 'loop';
+      let pickIndex = seqIndex;
+      if (mode === 'loop') {
+        pickIndex = seqIndex % responses.length;
+      } else if (seqIndex >= responses.length) {
+        pickIndex = responses.length - 1;
+      }
+      response = responses[pickIndex];
+    }
+
     // 1) Intentar responses con rule.match
     const ctx = {
       query: req.query || {},
@@ -162,12 +199,12 @@ export class MockRuntimeService {
       body: req.body,
     };
 
-    let response =
-      responses.find((r) => responseMatches(r.match, ctx)) ??
-      // 2) fallback a isDefault
-      responses.find((r) => r.isDefault) ??
-      // 3) fallback al primero
-      responses[0];
+    if (!response) {
+      response =
+        responses.find((r) => responseMatches(r.match, ctx)) ??
+        responses.find((r) => r.isDefault) ??
+        responses[0];
+    }
 
     if (!response) {
       throw new NotFoundException('No mock response defined');
@@ -181,12 +218,29 @@ export class MockRuntimeService {
     }
 
     // TEMPLATING de body con Handlebars
+    const stateContext: Record<string, string> = {};
+    if (matchedEndpoint.stateEnabled) {
+      // Pre-load common state keys used in templates via {{state.key}}
+      const stateKeys = ['counter', 'lastUser', 'visitCount'];
+      for (const sk of stateKeys) {
+        const val = await this.mockState.get(matchedEndpoint.id, sk);
+        if (val !== null) stateContext[sk] = val;
+      }
+      await this.mockState.increment(matchedEndpoint.id, 'visitCount');
+      stateContext.visitCount = await this.mockState.get(matchedEndpoint.id, 'visitCount') || '1';
+      if (req.body?.username) {
+        await this.mockState.set(matchedEndpoint.id, 'lastUser', String(req.body.username));
+        stateContext.lastUser = String(req.body.username);
+      }
+    }
+
     let renderedBody = renderWithTemplate(response.body, {
       params,
       query: req.query || {},
       body: req.body,
       headers: req.headers || {},
-    });
+      state: stateContext,
+    } as any);
 
     // Apply Faker.js templating if placeholders are present
     if (this.fakerTemplating.hasFakerPlaceholders(renderedBody)) {
@@ -296,8 +350,8 @@ export class MockRuntimeService {
     const cached = await this.redis.get(cacheKey);
     if (cached) return JSON.parse(cached);
 
-    const api = await this.prisma.apiDefinition.findUnique({
-      where: { workspaceId_slug: { workspaceId, slug: apiSlug } },
+    const api = await this.prisma.apiDefinition.findFirst({
+      where: { workspaceId, slug: apiSlug, isLatest: true },
       include: { endpoints: true },
     });
 

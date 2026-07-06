@@ -62,10 +62,10 @@ export class DeduplicationService {
       const hash = this.generateHash(requestData);
       const key = `dedup:${endpointId}:${hash}`;
 
-      await this.redis.setex(
+      await this.redis.set(
         key,
-        this.TTL,
         JSON.stringify(response),
+        this.TTL,
       );
 
       this.logger.debug(`Cached response for deduplication: ${key}`);

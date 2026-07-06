@@ -9,7 +9,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import { SamlService } from '../services/saml.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 

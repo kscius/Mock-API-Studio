@@ -5,6 +5,23 @@ All notable changes to Mock API Studio will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added - Open Source & State-of-the-Art
+
+- Open source governance: SECURITY.md, CODE_OF_CONDUCT.md, GOVERNANCE.md, CONTRIBUTORS.md
+- GitHub templates, Dependabot, CodeQL, release workflow
+- `backend/.env.example` and `frontend/.env.example`
+- Health endpoint: `GET /health`
+- Advanced mocking: stateful mocks, sequence responses, chaos injection
+- Endpoint history API: `GET /api-definitions/endpoints/:id/history`
+- State reset API: `POST /api-definitions/:apiId/state/reset`
+- Enterprise UI: Organizations, Contract Testing, WebSockets, Backup/Restore, AI Mocks
+- AI mock generation: `POST /admin/ai/generate-mocks` (OpenAI provider)
+- SDK generator: `GET /admin/sdk/:apiId/:language`
+- Fixed CI E2E pipeline and Playwright tests
+- Branding: logo SVG, updated README badges
+
 ## [Phase 20] - 2024-12-14
 
 ### Added - Enterprise Features

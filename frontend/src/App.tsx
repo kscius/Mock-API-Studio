@@ -26,6 +26,11 @@ import { AuditLogsPage } from './pages/AuditLogsPage';
 import { SlackIntegrationPage } from './pages/SlackIntegrationPage';
 import { MockRecordingPage } from './pages/MockRecordingPage';
 import { ApiDiffPage } from './pages/ApiDiffPage';
+import { OrganizationsPage } from './pages/OrganizationsPage';
+import { ContractTestingPage } from './pages/ContractTestingPage';
+import { WebSocketMocksPage } from './pages/WebSocketMocksPage';
+import { BackupRestorePage } from './pages/BackupRestorePage';
+import { SmartMockPage } from './pages/SmartMockPage';
 import './App.css';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -57,6 +62,21 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
                 <Link to="/webhooks" className={location.pathname === '/webhooks' ? 'active' : ''}>
                   Webhooks
+                </Link>
+                <Link to="/organizations" className={location.pathname === '/organizations' ? 'active' : ''}>
+                  Organizations
+                </Link>
+                <Link to="/contract-testing" className={location.pathname === '/contract-testing' ? 'active' : ''}>
+                  Contract Testing
+                </Link>
+                <Link to="/websocket-mocks" className={location.pathname === '/websocket-mocks' ? 'active' : ''}>
+                  WebSockets
+                </Link>
+                <Link to="/backup-restore" className={location.pathname === '/backup-restore' ? 'active' : ''}>
+                  Backup
+                </Link>
+                <Link to="/smart-mock" className={location.pathname === '/smart-mock' ? 'active' : ''}>
+                  AI Mocks
                 </Link>
                 <Link to="/analytics" className={location.pathname === '/analytics' ? 'active' : ''}>
                   Analytics
@@ -272,6 +292,56 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <ApiDiffPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/organizations"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <OrganizationsPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/contract-testing"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ContractTestingPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/websocket-mocks"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <WebSocketMocksPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/backup-restore"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <BackupRestorePage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/smart-mock"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <SmartMockPage />
             </AppLayout>
           </ProtectedRoute>
         }

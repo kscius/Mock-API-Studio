@@ -17,7 +17,7 @@ export interface AuditLogMetadata {
   entityType: 'api' | 'endpoint' | 'workspace' | 'webhook' | 'user';
   getEntityId?: (result: any, req: any) => string;
   getEntityName?: (result: any, req: any) => string;
-  getWorkspaceId?: (result: any, req: any) => string;
+  getWorkspaceId?: (result: any, req: any) => string | Promise<string | undefined>;
 }
 
 @Injectable()
@@ -44,44 +44,47 @@ export class AuditLogInterceptor implements NestInterceptor {
       tap((result) => {
         // Create audit log asynchronously (don't block response)
         setImmediate(() => {
-          try {
-            const entityId = metadata.getEntityId
-              ? metadata.getEntityId(result, req)
-              : result?.id || req.params?.id;
+          void (async () => {
+            try {
+              const entityId = metadata.getEntityId
+                ? metadata.getEntityId(result, req)
+                : result?.id || req.params?.id;
 
-            const entityName = metadata.getEntityName
-              ? metadata.getEntityName(result, req)
-              : result?.name || result?.slug;
+              const entityName = metadata.getEntityName
+                ? metadata.getEntityName(result, req)
+                : result?.name || result?.slug;
 
-            const workspaceId = metadata.getWorkspaceId
-              ? metadata.getWorkspaceId(result, req)
-              : result?.workspaceId || req.body?.workspaceId || req.query?.workspaceId;
+              const workspaceId = metadata.getWorkspaceId
+                ? await metadata.getWorkspaceId(result, req)
+                : result?.workspaceId || req.body?.workspaceId || req.query?.workspaceId;
 
-            if (!entityId || !workspaceId) {
-              return; // Can't log without required fields
+              if (!entityId || !workspaceId) {
+                return;
+              }
+
+              const changes = this.buildChanges(metadata.action, req.body, result);
+
+              await this.auditLogsService.create({
+                workspaceId,
+                userId: user?.id,
+                action: metadata.action,
+                entityType: metadata.entityType,
+                entityId,
+                entityName,
+                ...(changes ? { changes } : {}),
+                ipAddress: req.ip || req.connection?.remoteAddress,
+                userAgent: req.headers?.['user-agent'],
+              });
+            } catch (error) {
+              console.error('Failed to create audit log:', error);
             }
-
-            this.auditLogsService.create({
-              workspaceId,
-              userId: user?.id,
-              action: metadata.action,
-              entityType: metadata.entityType,
-              entityId,
-              entityName,
-              changes: this.buildChanges(metadata.action, req.body, result),
-              ipAddress: req.ip || req.connection?.remoteAddress,
-              userAgent: req.headers?.['user-agent'],
-            });
-          } catch (error) {
-            // Silently fail - audit logging should not break the main flow
-            console.error('Failed to create audit log:', error);
-          }
+          })();
         });
       }),
     );
   }
 
-  private buildChanges(action: string, requestBody: any, result: any) {
+  private buildChanges(action: string, requestBody: any, result: any): { before?: any; after?: any } | undefined {
     if (action === 'create') {
       return { after: result };
     }
@@ -97,7 +100,7 @@ export class AuditLogInterceptor implements NestInterceptor {
       return { before: result };
     }
 
-    return null;
+    return undefined;
   }
 }
 

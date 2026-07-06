@@ -60,5 +60,9 @@ export class ConfigService {
   get webhookRetryDelayMs(): number {
     return this.configService.get<number>('WEBHOOK_RETRY_DELAY_MS', 1000);
   }
+
+  get mockBaseUrl(): string {
+    return this.configService.get<string>('MOCK_BASE_URL', 'http://localhost:3000');
+  }
 }
 

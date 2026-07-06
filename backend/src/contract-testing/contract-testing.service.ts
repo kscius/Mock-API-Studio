@@ -4,7 +4,7 @@ import { Verifier } from '@pact-foundation/pact';
 import * as path from 'path';
 import * as fs from 'fs';
 
-interface PactContract {
+export interface PactContract {
   consumer: { name: string };
   provider: { name: string };
   interactions: PactInteraction[];

@@ -22,6 +22,19 @@
   ],
   "author": "Mock API Studio Contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kscius/Mock-API-Studio.git"
+  },
+  "homepage": "https://github.com/kscius/Mock-API-Studio#readme",
+  "bugs": {
+    "url": "https://github.com/kscius/Mock-API-Studio/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": {
     "commander": "^11.1.0",
     "inquirer": "^9.2.12",

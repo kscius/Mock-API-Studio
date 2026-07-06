@@ -1,7 +1,8 @@
 // frontend/src/pages/AnalyticsPage.tsx
 import React, { useState, useEffect } from 'react';
 import { AnalyticsApi, AnalyticsStats } from '../api/analytics';
-import { ApiDefinitionsApi, ApiDefinition } from '../api/api-definitions';
+import { apiDefinitionsApi } from '../api/api-definitions';
+import { ApiDefinition } from '../api/types';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format, subDays } from 'date-fns';
 
@@ -24,8 +25,8 @@ export const AnalyticsPage: React.FC = () => {
 
   const loadApis = async () => {
     try {
-      const data = await ApiDefinitionsApi.list();
-      setApis(data);
+      const response = await apiDefinitionsApi.getAll();
+      setApis(response.data);
     } catch (error) {
       console.error('Error cargando APIs:', error);
     }

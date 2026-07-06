@@ -89,7 +89,7 @@ export class WebhooksService {
 
     // Fire webhooks async without blocking
     webhooks.forEach((webhook) => {
-      this.sendWebhookWithRetry(webhook.targetUrl, payload, webhook.secret).catch((error) => {
+      this.sendWebhookWithRetry(webhook.targetUrl, payload, webhook.secret ?? undefined).catch((error) => {
         this.logger.error(
           `Failed to send webhook to ${webhook.targetUrl} after retries: ${error.message}`,
         );

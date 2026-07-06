@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Mock API Studio E2E', () => {
   test('should load login page', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/login');
     await expect(page.locator('h1')).toContainText('Mock API Studio');
   });
 
@@ -15,11 +15,9 @@ test.describe('Mock API Studio E2E', () => {
   test('should navigate to register page', async ({ page }) => {
     await page.goto('/login');
     const registerLink = page.locator('a:has-text("Register")');
-    
-    if (await registerLink.isVisible()) {
-      await registerLink.click();
-      await expect(page).toHaveURL(/\/register/);
-    }
+    await expect(registerLink).toBeVisible();
+    await registerLink.click();
+    await expect(page).toHaveURL(/\/register/);
   });
 });
 

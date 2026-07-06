@@ -1,8 +1,8 @@
 // frontend/src/pages/EndpointEditorPage.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiDefinitionsApi } from '../api/api-definitions';
-import { ApiDefinition, ApiEndpoint, MockResponse } from '../api/types';
+import { ApiEndpoint, MockResponse } from '../api/types';
 import { FakerMethodBrowser } from '../components/FakerMethodBrowser';
 import { ResponsePreview } from '../components/ResponsePreview';
 import { JSONEditor } from '../components/JSONEditor';
@@ -12,7 +12,6 @@ import toast from 'react-hot-toast';
 export function EndpointEditorPage() {
   const { apiId, endpointId } = useParams<{ apiId: string; endpointId: string }>();
   const navigate = useNavigate();
-  const [api, setApi] = useState<ApiDefinition | null>(null);
   const [endpoint, setEndpoint] = useState<ApiEndpoint | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
@@ -43,6 +42,11 @@ export function EndpointEditorPage() {
   const [cacheEnabled, setCacheEnabled] = useState(false);
   const [cacheTTL, setCacheTTL] = useState(3600);
   const [cacheControl, setCacheControl] = useState('public');
+  const [sequenceMode, setSequenceMode] = useState<'once' | 'loop' | ''>('');
+  const [chaosEnabled, setChaosEnabled] = useState(false);
+  const [chaosErrorRate, setChaosErrorRate] = useState(0);
+  const [chaosTimeoutRate, setChaosTimeoutRate] = useState(0);
+  const [stateEnabled, setStateEnabled] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -52,7 +56,6 @@ export function EndpointEditorPage() {
     try {
       setLoading(true);
       const apiResponse = await apiDefinitionsApi.getById(apiId!);
-      setApi(apiResponse.data);
 
       if (endpointId && endpointId !== 'new') {
         const ep = apiResponse.data.endpoints?.find((e) => e.id === endpointId);
@@ -73,6 +76,11 @@ export function EndpointEditorPage() {
           setCacheEnabled(ep.cacheEnabled || false);
           setCacheTTL(ep.cacheTTL || 3600);
           setCacheControl(ep.cacheControl || 'public');
+          setSequenceMode((ep.sequenceMode as 'once' | 'loop') || '');
+          setChaosEnabled(ep.chaosEnabled || false);
+          setChaosErrorRate(ep.chaosConfig?.errorRate ?? 0);
+          setChaosTimeoutRate(ep.chaosConfig?.timeoutRate ?? 0);
+          setStateEnabled(ep.stateEnabled || false);
         }
       }
     } catch (err) {
@@ -101,6 +109,12 @@ export function EndpointEditorPage() {
       cacheEnabled,
       cacheTTL,
       cacheControl,
+      sequenceMode: sequenceMode || null,
+      chaosEnabled,
+      chaosConfig: chaosEnabled
+        ? { errorRate: chaosErrorRate, timeoutRate: chaosTimeoutRate }
+        : null,
+      stateEnabled,
     };
 
     try {
@@ -364,6 +378,76 @@ export function EndpointEditorPage() {
                     <option value="public">Public</option>
                     <option value="private">Private</option>
                   </select>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Advanced Mocking */}
+          <div style={{ marginTop: '32px', padding: '20px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>
+              Advanced Mocking
+            </h3>
+            <div className="form-group">
+              <label className="label">Sequence Mode</label>
+              <select
+                className="select"
+                value={sequenceMode}
+                onChange={(e) => setSequenceMode(e.target.value as 'once' | 'loop' | '')}
+              >
+                <option value="">Disabled (use match rules)</option>
+                <option value="once">Once (then repeat last)</option>
+                <option value="loop">Loop responses</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input
+                  type="checkbox"
+                  checked={stateEnabled}
+                  onChange={(e) => setStateEnabled(e.target.checked)}
+                />
+                <span style={{ fontWeight: '600' }}>Stateful mocks</span>
+              </label>
+              <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
+                Use {'{{state.visitCount}}'}, {'{{state.lastUser}}'} in response bodies
+              </p>
+            </div>
+            <div className="form-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input
+                  type="checkbox"
+                  checked={chaosEnabled}
+                  onChange={(e) => setChaosEnabled(e.target.checked)}
+                />
+                <span style={{ fontWeight: '600' }}>Chaos injection</span>
+              </label>
+            </div>
+            {chaosEnabled && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginLeft: '24px' }}>
+                <div className="form-group">
+                  <label className="label">Error rate (0-1)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    step="0.05"
+                    min="0"
+                    max="1"
+                    value={chaosErrorRate}
+                    onChange={(e) => setChaosErrorRate(parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="label">Timeout rate (0-1)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    step="0.05"
+                    min="0"
+                    max="1"
+                    value={chaosTimeoutRate}
+                    onChange={(e) => setChaosTimeoutRate(parseFloat(e.target.value) || 0)}
+                  />
                 </div>
               </div>
             )}

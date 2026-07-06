@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { TeamsService } from './teams.service';
 import { CommentsService } from './comments.service';
@@ -78,8 +78,8 @@ export class TeamsController {
   }
 
   @Get()
-  async findAll(@Body() body: { organizationId: string }) {
-    return this.teamsService.findAll(body.organizationId);
+  async findAll(@Query('organizationId') organizationId: string) {
+    return this.teamsService.findAll(organizationId);
   }
 
   @Post(':id/members')
@@ -135,8 +135,11 @@ export class ChangeRequestsController {
   }
 
   @Get()
-  async findAll(@Body() body: { workspaceId: string; status?: any }) {
-    return this.changeRequestsService.findAll(body.workspaceId, body.status);
+  async findAll(
+    @Query('workspaceId') workspaceId: string,
+    @Query('status') status?: string,
+  ) {
+    return this.changeRequestsService.findAll(workspaceId, status as any);
   }
 
   @Post(':id/approve')

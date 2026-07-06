@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../contexts/WorkspaceContext';
-import { apiDefinitionsApi } from '../api/api-definitions';
 
 export const OpenApiImportPage: React.FC = () => {
   const { currentWorkspace } = useWorkspace();

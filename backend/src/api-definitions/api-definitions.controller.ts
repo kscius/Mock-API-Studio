@@ -135,6 +135,19 @@ export class ApiDefinitionsController {
     return this.service.duplicateEndpoint(endpointId, dto);
   }
 
+  @Get('endpoints/:endpointId/history')
+  getEndpointHistory(
+    @Param('endpointId') endpointId: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.service.getEndpointHistory(endpointId, limit ? parseInt(limit, 10) : 50);
+  }
+
+  @Post(':apiId/state/reset')
+  resetApiState(@Param('apiId') apiId: string) {
+    return this.service.resetApiState(apiId);
+  }
+
   // ========== IMPORT / EXPORT ==========
 
   @Get(':apiId/export')

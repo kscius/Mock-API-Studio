@@ -10,6 +10,7 @@ export interface TemplateContext {
   query: Record<string, any>;
   body: any;
   headers: Record<string, any>;
+  state?: Record<string, any>;
 }
 
 /**

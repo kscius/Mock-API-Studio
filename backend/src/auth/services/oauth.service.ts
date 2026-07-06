@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 
@@ -31,10 +31,8 @@ export class OAuthService {
       user = await this.prisma.user.create({
         data: {
           email: profile.email,
-          username: profile.username,
-          password: '', // OAuth users don't have passwords
-          isEmailVerified: true, // Trust OAuth providers
-          // Store OAuth info in metadata or separate table if needed
+          name: profile.displayName || profile.username,
+          password: '',
         },
       });
     }
@@ -43,7 +41,7 @@ export class OAuthService {
     const token = this.jwtService.sign({
       sub: user.id,
       email: user.email,
-      username: user.username,
+      name: user.name,
     });
 
     return { user, token };

@@ -22,6 +22,9 @@ import { MockRecordingModule } from './mock-recording/mock-recording.module';
 import { ContractTestingModule } from './contract-testing/contract-testing.module';
 import { ApiDiffModule } from './api-diff/api-diff.module';
 import { OrganizationsModule } from './organizations/organizations.module';
+import { HealthModule } from './health/health.module';
+import { AiModule } from './ai/ai.module';
+import { SdkModule } from './sdk/sdk.module';
 import { AuditLogInterceptor } from './audit-logs/interceptors/audit-log.interceptor';
 
 @Module({
@@ -50,6 +53,9 @@ import { AuditLogInterceptor } from './audit-logs/interceptors/audit-log.interce
     ContractTestingModule,
     ApiDiffModule,
     OrganizationsModule,
+    HealthModule,
+    AiModule,
+    SdkModule,
   ],
   controllers: [],
   providers: [
