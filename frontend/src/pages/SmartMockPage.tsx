@@ -23,6 +23,8 @@ export const SmartMockPage: React.FC = () => {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<GenerateResult | null>(null);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [generatedDocs, setGeneratedDocs] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentWorkspace) {
@@ -66,6 +68,27 @@ export const SmartMockPage: React.FC = () => {
     }
   };
 
+  const handleGenerateDocs = async () => {
+    if (!selectedApiId) {
+      alert('Please select an API');
+      return;
+    }
+
+    try {
+      setDocsLoading(true);
+      setGeneratedDocs(null);
+      const response = await apiClient.post<{ markdown: string; endpointCount: number }>(
+        '/admin/ai/generate-docs',
+        { apiId: selectedApiId },
+      );
+      setGeneratedDocs(response.data.markdown);
+    } catch (error: any) {
+      alert(`Error: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setDocsLoading(false);
+    }
+  };
+
   if (!currentWorkspace) {
     return <div style={{ padding: '20px' }}>Please select a workspace first.</div>;
   }
@@ -73,9 +96,9 @@ export const SmartMockPage: React.FC = () => {
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ marginBottom: '20px' }}>
-        <h1>AI Mock Generation</h1>
+        <h1>AI Features</h1>
         <p style={{ color: '#666', margin: '5px 0' }}>
-          Describe the API behavior you need and let AI generate mock endpoints
+          Generate mock endpoints or API documentation with AI providers (OpenAI, Ollama, Anthropic)
         </p>
       </div>
 
@@ -148,6 +171,50 @@ export const SmartMockPage: React.FC = () => {
             {loading ? 'Generating...' : 'Generate Mocks'}
           </button>
         </form>
+      </div>
+
+      <div style={{
+        backgroundColor: '#f9f9f9',
+        padding: '20px',
+        borderRadius: '8px',
+        marginBottom: '20px',
+        border: '1px solid #e0e0e0',
+      }}>
+        <h2 style={{ marginTop: 0 }}>Auto-Documentation</h2>
+        <p style={{ color: '#666', fontSize: '14px' }}>
+          Generate Markdown documentation from the selected API endpoints.
+        </p>
+        <button
+          type="button"
+          onClick={handleGenerateDocs}
+          disabled={docsLoading || !selectedApiId}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: docsLoading ? '#ccc' : '#5C6BC0',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: docsLoading ? 'not-allowed' : 'pointer',
+            fontSize: '14px',
+          }}
+        >
+          {docsLoading ? 'Generating docs...' : 'Generate Documentation'}
+        </button>
+        {generatedDocs && (
+          <pre style={{
+            marginTop: '16px',
+            padding: '16px',
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            border: '1px solid #e0e0e0',
+            whiteSpace: 'pre-wrap',
+            fontSize: '13px',
+            maxHeight: '400px',
+            overflow: 'auto',
+          }}>
+            {generatedDocs}
+          </pre>
+        )}
       </div>
 
       {result && (

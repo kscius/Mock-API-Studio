@@ -29,8 +29,11 @@ See [PUBLISHING.md](./PUBLISHING.md) for step-by-step instructions.
 
 - [x] ESLint configuration for backend and frontend
 - [x] Container scanning workflow (Trivy)
+- [x] Pact Broker integration (import/publish)
+- [x] AI providers: OpenAI, Ollama, Anthropic + auto-documentation
+- [x] Multi-region deployment guide (`docs/MULTI_REGION.md`)
+
+## Future
 
 - gRPC mocking
-- Pact Broker integration
 - Desktop offline app (Tauri/Electron)
-- Multi-region deployment guide

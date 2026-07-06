@@ -24,6 +24,18 @@ interface ValidationResult {
   }>;
 }
 
+interface BrokerPact {
+  consumer: string;
+  provider: string;
+  version: string;
+  createdAt?: string;
+}
+
+interface BrokerStatus {
+  configured: boolean;
+  baseUrl: string | null;
+}
+
 export const ContractTestingPage: React.FC = () => {
   const { currentWorkspace } = useWorkspace();
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -35,13 +47,90 @@ export const ContractTestingPage: React.FC = () => {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [uploading, setUploading] = useState(false);
   const [validating, setValidating] = useState(false);
+  const [brokerStatus, setBrokerStatus] = useState<BrokerStatus | null>(null);
+  const [brokerProvider, setBrokerProvider] = useState('');
+  const [brokerPacts, setBrokerPacts] = useState<BrokerPact[]>([]);
+  const [brokerConsumer, setBrokerConsumer] = useState('');
+  const [brokerVersion, setBrokerVersion] = useState('');
+  const [publishVersion, setPublishVersion] = useState('');
+  const [brokerLoading, setBrokerLoading] = useState(false);
 
   useEffect(() => {
     loadContracts();
+    loadBrokerStatus();
     if (currentWorkspace) {
       loadApis();
     }
   }, [currentWorkspace]);
+
+  const loadBrokerStatus = async () => {
+    try {
+      const response = await apiClient.get<BrokerStatus>('/admin/contract-testing/broker/status');
+      setBrokerStatus(response.data);
+    } catch (error) {
+      console.error('Failed to load broker status:', error);
+    }
+  };
+
+  const loadBrokerPacts = async () => {
+    if (!brokerProvider.trim()) {
+      alert('Enter a provider name to list broker pacts');
+      return;
+    }
+    try {
+      setBrokerLoading(true);
+      const response = await apiClient.get<{ pacts: BrokerPact[] }>(
+        '/admin/contract-testing/broker/pacts',
+        { params: { provider: brokerProvider.trim() } },
+      );
+      setBrokerPacts(response.data.pacts);
+    } catch (error: any) {
+      alert(`Error: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setBrokerLoading(false);
+    }
+  };
+
+  const handleBrokerImport = async () => {
+    if (!selectedApiId || !brokerConsumer.trim() || !brokerProvider.trim()) {
+      alert('Select an API and enter consumer/provider names');
+      return;
+    }
+    try {
+      setBrokerLoading(true);
+      await apiClient.post('/admin/contract-testing/broker/import', {
+        apiId: selectedApiId,
+        consumer: brokerConsumer.trim(),
+        provider: brokerProvider.trim(),
+        version: brokerVersion.trim() || undefined,
+      });
+      alert('Contract imported from Pact Broker');
+      await loadContracts();
+    } catch (error: any) {
+      alert(`Error: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setBrokerLoading(false);
+    }
+  };
+
+  const handleBrokerPublish = async () => {
+    if (!selectedContractId || !publishVersion.trim()) {
+      alert('Select a contract and enter a version to publish');
+      return;
+    }
+    try {
+      setBrokerLoading(true);
+      await apiClient.post('/admin/contract-testing/broker/publish', {
+        contractId: selectedContractId,
+        version: publishVersion.trim(),
+      });
+      alert('Contract published to Pact Broker');
+    } catch (error: any) {
+      alert(`Error: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setBrokerLoading(false);
+    }
+  };
 
   const loadContracts = async () => {
     try {
@@ -309,6 +398,111 @@ export const ContractTestingPage: React.FC = () => {
               </div>
             )}
           </div>
+        )}
+      </div>
+
+      <div style={{
+        backgroundColor: '#f9f9f9',
+        padding: '20px',
+        borderRadius: '8px',
+        marginBottom: '20px',
+        border: '1px solid #e0e0e0',
+      }}>
+        <h2>Pact Broker</h2>
+        {brokerStatus && (
+          <p style={{ color: '#666', fontSize: '14px' }}>
+            {brokerStatus.configured
+              ? `Connected to ${brokerStatus.baseUrl}`
+              : 'Broker not configured. Set PACT_BROKER_BASE_URL on the server.'}
+          </p>
+        )}
+        <div style={{ display: 'grid', gap: '12px', maxWidth: '600px' }}>
+          <input
+            type="text"
+            placeholder="Provider name"
+            value={brokerProvider}
+            onChange={(e) => setBrokerProvider(e.target.value)}
+            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+          <input
+            type="text"
+            placeholder="Consumer name (for import)"
+            value={brokerConsumer}
+            onChange={(e) => setBrokerConsumer(e.target.value)}
+            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+          <input
+            type="text"
+            placeholder="Version (optional — uses latest if empty)"
+            value={brokerVersion}
+            onChange={(e) => setBrokerVersion(e.target.value)}
+            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={loadBrokerPacts}
+              disabled={brokerLoading || !brokerStatus?.configured}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#607D8B',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: brokerLoading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              List Broker Pacts
+            </button>
+            <button
+              type="button"
+              onClick={handleBrokerImport}
+              disabled={brokerLoading || !brokerStatus?.configured}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#00897B',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: brokerLoading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              Import from Broker
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              placeholder="Publish version (e.g. 1.0.0)"
+              value={publishVersion}
+              onChange={(e) => setPublishVersion(e.target.value)}
+              style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', flex: 1 }}
+            />
+            <button
+              type="button"
+              onClick={handleBrokerPublish}
+              disabled={brokerLoading || !brokerStatus?.configured}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#3949AB',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: brokerLoading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              Publish Selected Contract
+            </button>
+          </div>
+        </div>
+        {brokerPacts.length > 0 && (
+          <ul style={{ marginTop: '16px', paddingLeft: '20px' }}>
+            {brokerPacts.map((pact) => (
+              <li key={`${pact.consumer}-${pact.version}`}>
+                {pact.consumer} → {pact.provider} @ {pact.version}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 
