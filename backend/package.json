@@ -58,7 +58,7 @@
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
-    "path-to-regexp": "^6.2.1",
+    "path-to-regexp": "^8.4.2",
     "prom-client": "^15.1.0",
     "qrcode": "^1.5.4",
     "redis": "^6.1.0",
