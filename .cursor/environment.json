@@ -1,0 +1,15 @@
+{
+  "name": "Mock API Studio",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "install": "cd backend && npm ci && npx prisma generate && cd ../frontend && npm ci && cd ../cli && npm ci",
+  "start": "docker compose up db redis -d",
+  "terminals": [
+    {
+      "name": "backend-dev",
+      "command": "cd backend && npm run start:dev"
+    }
+  ]
+}
