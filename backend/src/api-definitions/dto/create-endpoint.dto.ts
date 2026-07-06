@@ -30,7 +30,7 @@ export class CreateEndpointDto {
   // GraphQL fields
   @IsString()
   @IsOptional()
-  @IsIn(['REST', 'GRAPHQL'])
+  @IsIn(['REST', 'GRAPHQL', 'GRPC'])
   type?: string;
 
   @IsString()
@@ -39,7 +39,7 @@ export class CreateEndpointDto {
 
   @IsString()
   @IsOptional()
-  @IsIn(['query', 'mutation', 'subscription'])
+  @IsIn(['query', 'mutation', 'subscription', 'unary', 'server_streaming', 'client_streaming', 'bidi_streaming'])
   operationType?: string;
 
   @IsString()

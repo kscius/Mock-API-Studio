@@ -32,6 +32,7 @@ async function bootstrap() {
   
   console.log(`🚀 Mock API Studio Backend running on http://localhost:${port}`);
   console.log(`📚 Mock Runtime: http://localhost:${port}/mock/:apiSlug/*`);
+  console.log(`🔌 gRPC Mock Gateway: http://localhost:${port}/mock-grpc/:apiSlug`);
   console.log(`🔐 Auth endpoints: http://localhost:${port}/auth/*`);
   console.log(`📊 Analytics: ${analyticsEnabled ? 'ENABLED' : 'DISABLED'}`);
 }

@@ -1,5 +1,5 @@
 // backend/src/api-definitions/dto/update-endpoint.dto.ts
-import { IsString, IsOptional, IsNumber, IsBoolean, IsArray, IsObject } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean, IsArray, IsObject, IsIn } from 'class-validator';
 
 export class UpdateEndpointDto {
   @IsString()
@@ -29,6 +29,16 @@ export class UpdateEndpointDto {
   @IsBoolean()
   @IsOptional()
   enabled?: boolean;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['REST', 'GRAPHQL', 'GRPC'])
+  type?: string;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['query', 'mutation', 'subscription', 'unary', 'server_streaming', 'client_streaming', 'bidi_streaming'])
+  operationType?: string;
 
   @IsString()
   @IsOptional()

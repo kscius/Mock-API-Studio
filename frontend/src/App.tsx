@@ -31,6 +31,7 @@ import { ContractTestingPage } from './pages/ContractTestingPage';
 import { WebSocketMocksPage } from './pages/WebSocketMocksPage';
 import { BackupRestorePage } from './pages/BackupRestorePage';
 import { SmartMockPage } from './pages/SmartMockPage';
+import { GrpcMocksPage } from './pages/GrpcMocksPage';
 import './App.css';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -56,6 +57,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
                 <Link to="/graphql-tester" className={location.pathname === '/graphql-tester' ? 'active' : ''}>
                   GraphQL Tester
+                </Link>
+                <Link to="/grpc-mocks" className={location.pathname === '/grpc-mocks' ? 'active' : ''}>
+                  gRPC Mocks
                 </Link>
                 <Link to="/workspaces" className={location.pathname === '/workspaces' ? 'active' : ''}>
                   Workspaces
@@ -222,6 +226,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <GraphQLTesterPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/grpc-mocks"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <GrpcMocksPage />
             </AppLayout>
           </ProtectedRoute>
         }

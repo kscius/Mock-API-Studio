@@ -92,7 +92,7 @@ model ApiEndpoint {
   delayMs         Int           @default(0)
   enabled         Boolean       @default(true)
   // GraphQL support
-  type            String        @default("REST") // REST | GRAPHQL
+  type            String        @default("REST") // REST | GRAPHQL | GRPC
   operationName   String?       // for GraphQL
   operationType   String?       // query | mutation | subscription
   // Proxy Mode

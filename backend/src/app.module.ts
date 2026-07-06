@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { GraphQLRuntimeModule } from './graphql-runtime/graphql-runtime.module';
+import { GrpcRuntimeModule } from './grpc-runtime/grpc-runtime.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { WebSocketMocksModule } from './websocket-mocks/websocket-mocks.module';
@@ -44,6 +45,7 @@ import { AuditLogInterceptor } from './audit-logs/interceptors/audit-log.interce
     WebhooksModule,
     MockRuntimeModule,
     GraphQLRuntimeModule,
+    GrpcRuntimeModule,
     AnalyticsModule,
     AuditLogsModule,
     IntegrationsModule,
