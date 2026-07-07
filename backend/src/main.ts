@@ -33,6 +33,11 @@ async function bootstrap() {
   console.log(`🚀 Mock API Studio Backend running on http://localhost:${port}`);
   console.log(`📚 Mock Runtime: http://localhost:${port}/mock/:apiSlug/*`);
   console.log(`🔌 gRPC Mock Gateway: http://localhost:${port}/mock-grpc/:apiSlug`);
+  if (process.env.GRPC_ENABLED === 'true') {
+    console.log(
+      `🔌 gRPC Wire Server: ${process.env.GRPC_HOST ?? '0.0.0.0'}:${process.env.GRPC_PORT ?? '50051'}`,
+    );
+  }
   console.log(`🔐 Auth endpoints: http://localhost:${port}/auth/*`);
   console.log(`📊 Analytics: ${analyticsEnabled ? 'ENABLED' : 'DISABLED'}`);
 }

@@ -25,6 +25,35 @@ export class GrpcRuntimeService {
   ) {}
 
   async invoke(req: GrpcInvokeRequest): Promise<GrpcInvokeResponse> {
+    const mock = await this.resolveMock(req);
+
+    if (mock.delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, mock.delayMs));
+    }
+
+    if (mock.streaming === 'server_streaming') {
+      const messages = Array.isArray(mock.body) ? mock.body : [mock.body];
+      return {
+        service: mock.service,
+        method: mock.method,
+        message: messages,
+        metadata: mock.headers,
+      };
+    }
+
+    return {
+      service: mock.service,
+      method: mock.method,
+      message: mock.body,
+      metadata: mock.headers,
+    };
+  }
+
+  async invokeFromWire(req: GrpcInvokeRequest): Promise<GrpcInvokeResponse> {
+    return this.invoke(req);
+  }
+
+  private async resolveMock(req: GrpcInvokeRequest) {
     const api = await this.getApiFromCacheOrDb(req.workspaceId, req.apiSlug);
     const normalizedService = this.normalizeService(req.service);
     const normalizedMethod = req.method.trim();
@@ -57,28 +86,22 @@ export class GrpcRuntimeService {
       );
     }
 
-    if (endpoint.delayMs && endpoint.delayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, endpoint.delayMs));
-    }
-
-    if (endpoint.operationType === 'server_streaming') {
-      const messages = Array.isArray(response.body)
-        ? response.body
-        : [response.body];
-      return {
-        service: normalizedService,
-        method: normalizedMethod,
-        message: messages,
-        metadata: response.headers,
-      };
-    }
-
     return {
       service: normalizedService,
       method: normalizedMethod,
-      message: response.body,
-      metadata: response.headers,
+      body: response.body,
+      headers: response.headers,
+      streaming: (endpoint.operationType as string | null) ?? 'unary',
+      delayMs: endpoint.delayMs ?? 0,
     };
+  }
+
+  async setWireEnabled(apiId: string, enabled: boolean) {
+    const api = await this.prisma.apiDefinition.update({
+      where: { id: apiId },
+      data: { grpcWireEnabled: enabled },
+    });
+    return { apiId: api.id, grpcWireEnabled: api.grpcWireEnabled };
   }
 
   async listMethods(apiId: string) {

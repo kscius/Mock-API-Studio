@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 
 // cli/src/index.ts
+import { createRequire } from 'node:module';
 import { Command } from 'commander';
 import chalk from 'chalk';
+
+const require = createRequire(import.meta.url);
+const { version: cliVersion } = require('../package.json') as { version: string };
 import { registerLoginCommand } from './commands/login.js';
 import { registerWorkspaceCommands } from './commands/workspace.js';
 import { registerApiCommands } from './commands/api.js';
@@ -14,7 +18,7 @@ const program = new Command();
 program
   .name('mock-api')
   .description('CLI for Mock API Studio')
-  .version('1.0.0');
+  .version(cliVersion);
 
 // Register commands
 registerLoginCommand(program);

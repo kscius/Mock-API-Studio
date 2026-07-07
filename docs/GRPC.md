@@ -1,6 +1,9 @@
 # gRPC Mocking
 
-Mock API Studio supports gRPC mocks through a **JSON gateway** that maps service/method pairs to stored mock responses.
+Mock API Studio supports gRPC mocks through:
+
+1. **JSON gateway** (HTTP) — quick tests and scripts
+2. **Native wire server** (TCP/protobuf) — real gRPC clients (`grpcurl`, generated stubs)
 
 ## Concepts
 
@@ -82,11 +85,65 @@ Open **gRPC Mocks** in the admin UI to:
 - Invoke mocks against the JSON gateway
 - View configured service/method pairs
 
+## Native wire server (protobuf)
+
+Enable in `backend/.env`:
+
+```env
+GRPC_ENABLED=true
+GRPC_PORT=50051
+GRPC_PROTO_STORAGE_DIR=./data/grpc-protos
+```
+
+### Import a `.proto` file (admin)
+
+```http
+POST /admin/grpc/apis/{apiId}/proto/import
+Authorization: Bearer {jwt}
+Content-Type: application/json
+
+{
+  "filename": "user.proto",
+  "content": "syntax = \"proto3\"; ...",
+  "autoCreateEndpoints": true
+}
+```
+
+Enable wire mocks for the API:
+
+```http
+POST /admin/grpc/apis/{apiId}/wire/enable
+{ "enabled": true }
+```
+
+### Client metadata
+
+| Metadata key | Purpose |
+|--------------|---------|
+| `x-mock-api-slug` | API slug (required unless `GRPC_DEFAULT_API_SLUG` is set) |
+| `x-workspace-id` | Workspace scope |
+
+### grpcurl example
+
+```bash
+grpcurl -plaintext \
+  -H "x-mock-api-slug: users-api" \
+  -H "x-workspace-id: {workspaceId}" \
+  -import-path ./protos -proto user.proto \
+  -d '{"id":"1"}' \
+  localhost:50051 users.v1.UserService/GetUser
+```
+
+### Server status
+
+```http
+GET /admin/grpc/server/status
+POST /admin/grpc/server/reload
+```
+
 ## Client integration
 
-Use the JSON gateway from tests and scripts when you do not need protobuf on the wire. For native gRPC/protobuf clients, generate stubs from your `.proto` files and point integration tests at the gateway via a thin adapter, or use HTTP-based contract tests.
-
-Native protobuf gRPC server support is planned for a future release.
+Use the JSON gateway from tests when you do not need protobuf on the wire. For native clients, import protos via admin, enable wire mode, and call the TCP server on `GRPC_PORT`.
 
 ## Related
 

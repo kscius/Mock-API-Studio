@@ -69,6 +69,8 @@ model ApiDefinition {
   tags        String[]
   endpoints   ApiEndpoint[]
   websocketEndpoints WebSocketEndpoint[]
+  grpcProtoBundles GrpcProtoBundle[]
+  grpcWireEnabled Boolean @default(false)
   // Versioning
   parentId    String?       // Reference to previous version
   parent      ApiDefinition? @relation("ApiVersions", fields: [parentId], references: [id], onDelete: SetNull)
@@ -116,6 +118,23 @@ model ApiEndpoint {
 
   @@unique([apiId, method, path])
   @@map("api_endpoints")
+}
+
+model GrpcProtoBundle {
+  id          String        @id @default(uuid())
+  apiId       String
+  api         ApiDefinition @relation(fields: [apiId], references: [id], onDelete: Cascade)
+  filename    String
+  storagePath String
+  packageName String?
+  services    Json
+  sha256      String
+  isPrimary   Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([apiId, filename])
+  @@map("grpc_proto_bundles")
 }
 
 model User {

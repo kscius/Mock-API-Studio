@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-07-06
+
 ### Added - Open Source & State-of-the-Art
 
 - Open source governance: SECURITY.md, CODE_OF_CONDUCT.md, GOVERNANCE.md, CONTRIBUTORS.md
@@ -21,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SDK generator: `GET /admin/sdk/:apiId/:language`
 - Fixed CI E2E pipeline and Playwright tests
 - Branding: logo SVG, updated README badges
+- v1.0.0 publish automation: version verify job, npm provenance, release assets (`npm run publish:check`)
+- Native gRPC/protobuf wire server (`GRPC_ENABLED`, proto import, `GRPC_PORT`)
+- Desktop offline app scaffold (Tauri) under `desktop/`
 
 ## [Phase 20] - 2024-12-14
 

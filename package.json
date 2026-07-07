@@ -31,7 +31,11 @@
     "prisma:migrate": "cd backend && npm run prisma:migrate",
     "prisma:seed": "cd backend && npm run prisma:seed",
     "prisma:studio": "cd backend && npm run prisma:studio",
-    "prepare": "husky"
+    "prepare": "husky",
+    "publish:check": "node scripts/publish-readiness.mjs 1.0.0",
+    "dev:desktop": "cd desktop && npm run dev",
+    "build:desktop": "cd desktop && npm run build",
+    "docker:desktop-deps": "docker compose up -d db redis"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.1",

@@ -15,8 +15,18 @@ This document tracks Mock API Studio readiness for public open source adoption.
 - [x] Enterprise UI: organizations, contract testing, WebSockets, backup, AI mocks
 - [x] AI mock generation scaffold (`POST /admin/ai/generate-mocks`)
 - [x] SDK generator endpoint (`GET /admin/sdk/:apiId/:language`)
+- [x] ESLint configuration for backend and frontend
+- [x] Container scanning workflow (Trivy)
+- [x] Pact Broker integration (import/publish)
+- [x] AI providers: OpenAI, Ollama, Anthropic + auto-documentation
+- [x] Multi-region deployment guide (`docs/MULTI_REGION.md`)
+- [x] gRPC mocking (JSON gateway + admin UI) — see `docs/GRPC.md`
+- [x] v1.0.0 publish automation (`npm run publish:check`, release assets, npm provenance)
+- [x] Native gRPC/protobuf wire server — see `docs/GRPC.md`
+- [x] Desktop offline app scaffold (Tauri) — see `desktop/README.md`
+- [x] GitHub Discussions templates (enable Discussions in repo settings)
 
-## Before v1.0.0 public release
+## Before v1.0.0 public release (manual secrets)
 
 See [PUBLISHING.md](./PUBLISHING.md) for step-by-step instructions.
 
@@ -24,17 +34,9 @@ See [PUBLISHING.md](./PUBLISHING.md) for step-by-step instructions.
 - [ ] Configure `DOCKER_USERNAME` / `DOCKER_PASSWORD` for image publishing
 - [x] Add VS Code extension PNG icon (`vscode-extension/images/icon.png`)
 - [ ] Publish VS Code extension to Marketplace (set `VSCE_PAT`; release workflow ready)
-- [ ] Publish Terraform provider to Registry
-- [x] GitHub Discussions templates (enable Discussions in repo settings)
-
-- [x] ESLint configuration for backend and frontend
-- [x] Container scanning workflow (Trivy)
-- [x] Pact Broker integration (import/publish)
-- [x] AI providers: OpenAI, Ollama, Anthropic + auto-documentation
-- [x] Multi-region deployment guide (`docs/MULTI_REGION.md`)
-- [x] gRPC mocking (JSON gateway + admin UI) — see `docs/GRPC.md`
+- [ ] Publish Terraform provider to Registry (post-v1.0.0; provider ships in-repo)
 
 ## Future
 
-- Native gRPC/protobuf wire server
-- Desktop offline app (Tauri/Electron)
+- Terraform provider Registry publish (GPG + GoReleaser)
+- Desktop bundled backend sidecar (offline without Docker)

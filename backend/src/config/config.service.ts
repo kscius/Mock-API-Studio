@@ -64,5 +64,37 @@ export class ConfigService {
   get mockBaseUrl(): string {
     return this.configService.get<string>('MOCK_BASE_URL', 'http://localhost:3000');
   }
+
+  get grpcEnabled(): boolean {
+    return this.configService.get<string>('GRPC_ENABLED', 'false') === 'true';
+  }
+
+  get grpcHost(): string {
+    return this.configService.get<string>('GRPC_HOST', '0.0.0.0');
+  }
+
+  get grpcPort(): number {
+    return Number(this.configService.get<string>('GRPC_PORT', '50051'));
+  }
+
+  get grpcProtoStorageDir(): string {
+    return this.configService.get<string>('GRPC_PROTO_STORAGE_DIR', './data/grpc-protos');
+  }
+
+  get grpcMaxReceiveMessageLength(): number {
+    return Number(this.configService.get<string>('GRPC_MAX_RECEIVE_MESSAGE_LENGTH', '4194304'));
+  }
+
+  get grpcMaxSendMessageLength(): number {
+    return Number(this.configService.get<string>('GRPC_MAX_SEND_MESSAGE_LENGTH', '4194304'));
+  }
+
+  get grpcDefaultWorkspaceId(): string {
+    return this.configService.get<string>('GRPC_DEFAULT_WORKSPACE_ID', '');
+  }
+
+  get grpcDefaultApiSlug(): string {
+    return this.configService.get<string>('GRPC_DEFAULT_API_SLUG', '');
+  }
 }
 

@@ -6,10 +6,10 @@ This document describes how to publish Mock API Studio artifacts for the v1.0.0 
 
 | Artifact | Secret / account | Notes |
 |----------|------------------|-------|
-| npm CLI (`@mock-api-studio/cli`) | `NPM_TOKEN` | npm account with publish access |
+| npm CLI (`@mock-api-studio/cli`) | `NPM_TOKEN` | npm account with publish access; enable trusted publishing for provenance |
 | Docker images | `DOCKER_USERNAME`, `DOCKER_PASSWORD` | Docker Hub or compatible registry |
 | VS Code extension | `VSCE_PAT` | Azure DevOps PAT with Marketplace **Manage** scope |
-| Terraform provider | GPG key + `HASHICORP_REGISTRY_TOKEN` | Optional; see HashiCorp Registry docs |
+| Terraform provider | `GPG_PRIVATE_KEY`, `GPG_PASSPHRASE`, `GPG_FINGERPRINT`, `HASHICORP_REGISTRY_TOKEN` | Optional post-v1.0.0; see Terraform section |
 
 Configure repository secrets under **Settings → Secrets and variables → Actions**.
 
@@ -17,10 +17,18 @@ Configure repository secrets under **Settings → Secrets and variables → Acti
 
 Pushing a semver tag (`v*.*.*`) triggers [`.github/workflows/release.yml`](../.github/workflows/release.yml):
 
-1. GitHub Release with generated notes
-2. `npm publish` for `@mock-api-studio/cli`
-3. Docker images for backend and frontend
-4. VS Code extension publish (when `VSCE_PAT` is set)
+1. **Version verification** — tag must match all `package.json` versions
+2. GitHub Release with generated notes
+3. Release assets: CLI `.tgz` and VSIX attached to the release
+4. `npm publish --provenance` for `@mock-api-studio/cli` (when `NPM_TOKEN` is set)
+5. Docker images for backend and frontend (when Docker secrets are set)
+6. VS Code extension publish (when `VSCE_PAT` is set)
+
+Local pre-flight:
+
+```bash
+npm run publish:check
+```
 
 ```bash
 git tag v1.0.0
@@ -86,7 +94,9 @@ cd terraform-provider-mock-api-studio
 go build -o terraform-provider-mock-api-studio
 ```
 
-Registry publishing follows HashiCorp’s [Provider Publishing](https://developer.hashicorp.com/terraform/registry/providers/publishing) process:
+Registry publishing follows HashiCorp’s [Provider Publishing](https://developer.hashicorp.com/terraform/registry/providers/publishing) process.
+
+> **v1.0.0:** The provider ships in-repo for local builds. Registry publish requires `go.mod`, GPG signing, and namespace approval — planned post-v1.0.0.
 
 1. Build for multiple platforms (`goreleaser` recommended)
 2. Sign release with GPG
@@ -102,8 +112,23 @@ Suggested categories:
 - **Q&A** — community support
 - **Ideas** — feature requests (link to Issues for actionable items)
 
+## Version sync (required before tag)
+
+All of these must equal the tag without `v` (e.g. `1.0.0`):
+
+- `package.json`, `cli/package.json`, `vscode-extension/package.json`
+- `backend/package.json`, `frontend/package.json`
+- `CHANGELOG.md` — `## [1.0.0] - YYYY-MM-DD` section
+
+```bash
+npm run publish:check
+git tag v1.0.0
+git push origin v1.0.0
+```
+
 ## Pre-release checklist
 
+- [ ] `npm run publish:check` passes
 - [ ] All CI jobs green on `main`
 - [ ] `CHANGELOG` or release notes reviewed
 - [ ] Secrets configured (`NPM_TOKEN`, Docker, `VSCE_PAT`)
