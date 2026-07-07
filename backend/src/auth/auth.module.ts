@@ -16,6 +16,15 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { ConfigModule } from '../config/config.module';
 import { ConfigService } from '../config/config.service';
 
+const oauthStrategies = [
+  ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+    ? [GithubStrategy]
+    : []),
+  ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ? [GoogleStrategy]
+    : []),
+];
+
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -34,8 +43,7 @@ import { ConfigService } from '../config/config.service';
     OAuthService,
     SamlService,
     JwtStrategy,
-    GithubStrategy,
-    GoogleStrategy,
+    ...oauthStrategies,
   ],
   controllers: [
     AuthController,

@@ -49,6 +49,7 @@ services:
       REDIS_PORT: 6379
       PORT: 3000
       NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-mock-api-studio-secret-change-in-production}
     ports:
       - "3000:3000"
     networks:
