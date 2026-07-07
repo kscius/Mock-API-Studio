@@ -14,7 +14,7 @@ test.describe('Mock API Studio E2E', () => {
 
   test('should navigate to register page', async ({ page }) => {
     await page.goto('/login');
-    const registerLink = page.locator('a:has-text("Register")');
+    const registerLink = page.locator('a:has-text("Sign up here")');
     await expect(registerLink).toBeVisible();
     await registerLink.click();
     await expect(page).toHaveURL(/\/register/);
