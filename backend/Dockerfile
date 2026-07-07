@@ -45,5 +45,5 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 3000
 
 # Start the application (migrations only; seed requires devDependencies)
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
 
