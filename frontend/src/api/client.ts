@@ -36,12 +36,20 @@ apiClient.interceptors.response.use(
 
     // Handle different status codes
     switch (status) {
-      case 401:
-        toast.error('Unauthorized. Please log in again.');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+      case 401: {
+        const isPublicAuthRoute = /^\/(login|register)(\/|$)/.test(window.location.pathname)
+          || window.location.pathname.startsWith('/auth/');
+
+        if (!isPublicAuthRoute) {
+          toast.error('Unauthorized. Please log in again.');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('mock-api-studio-token');
+          localStorage.removeItem('mock-api-studio-user');
+          window.location.href = '/login';
+        }
         break;
+      }
       case 403:
         toast.error('Forbidden. You do not have permission to access this resource.');
         break;

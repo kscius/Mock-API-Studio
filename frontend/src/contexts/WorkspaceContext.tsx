@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Workspace } from '../api/types';
 import { workspacesApi } from '../api/workspaces';
+import { useAuth } from './AuthContext';
 
 interface WorkspaceContextType {
   workspaces: Workspace[];
@@ -13,6 +14,7 @@ interface WorkspaceContextType {
 export const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
 export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [currentWorkspace, setCurrentWorkspaceState] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,8 +38,17 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   useEffect(() => {
-    refreshWorkspaces();
-  }, []);
+    if (authLoading) {
+      return;
+    }
+
+    if (isAuthenticated) {
+      void refreshWorkspaces();
+      return;
+    }
+
+    setLoading(false);
+  }, [authLoading, isAuthenticated]);
 
   const setCurrentWorkspace = (workspace: Workspace) => {
     setCurrentWorkspaceState(workspace);
